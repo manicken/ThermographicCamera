@@ -19,7 +19,7 @@ boolean Adafruit_MLX90640::begin(uint8_t i2c_addr, TwoWire *wire) {
   if (!i2c_dev->begin()) {
     return false;
   }
-  // wire->setClock(400000); // Speed it up, lots to read :)
+   wire->setClock(800000); // Speed it up, lots to read :)
   MLX90640_I2CRead(0, MLX90640_DEVICEID1, 3, serialNumber);
 
   uint16_t eeMLX90640[832];

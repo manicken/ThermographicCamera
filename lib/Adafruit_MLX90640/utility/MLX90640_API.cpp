@@ -92,7 +92,7 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
         cnt = cnt + 1;
     }
     
-    if(cnt > 4)
+    if(cnt > 10)
     {
 #ifdef MLX90640_DEBUG
       Serial.printf("TOO MANY RETRIES");
