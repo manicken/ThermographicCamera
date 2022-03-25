@@ -3,6 +3,7 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include <SPI.h>
+#include "interpolation.h"
 
 #define TFT_SCK       13
 #define TFT_MOSI      11
@@ -10,6 +11,7 @@
 #define TFT_RST        9 // Or set to -1 and connect to Arduino RESET pin
 #define TFT_DC         8
 
+uint32_t t = 0;// used for easy timing stuff
 
 Adafruit_MLX90640 mlx;
 float frame[32*24]; // buffer for full frame of temperatures
@@ -50,79 +52,71 @@ const uint16_t camColors[] = {0x480F,
 0xF1E0,0xF1C0,0xF1A0,0xF180,0xF160,0xF140,0xF100,0xF0E0,0xF0C0,0xF0A0,
 0xF080,0xF060,0xF040,0xF020,0xF800,};
 
+void printMLX_current_settings()
+{
+    Serial.print("Current mode: ");
+    if (mlx.getMode() == MLX90640_CHESS) {
+        Serial.println("Chess");
+    } else {
+        Serial.println("Interleave");    
+    }
+    Serial.print("Current resolution: ");
+    mlx90640_resolution_t res = mlx.getResolution();
+    switch (res) {
+        case MLX90640_ADC_16BIT: Serial.println("16 bit"); break;
+        case MLX90640_ADC_17BIT: Serial.println("17 bit"); break;
+        case MLX90640_ADC_18BIT: Serial.println("18 bit"); break;
+        case MLX90640_ADC_19BIT: Serial.println("19 bit"); break;
+    }
+    Serial.print("Current frame rate: ");
+    mlx90640_refreshrate_t rate = mlx.getRefreshRate();
+    switch (rate) {
+        case MLX90640_0_5_HZ: Serial.println("0.5 Hz"); break;
+        case MLX90640_1_HZ: Serial.println("1 Hz"); break; 
+        case MLX90640_2_HZ: Serial.println("2 Hz"); break;
+        case MLX90640_4_HZ: Serial.println("4 Hz"); break;
+        case MLX90640_8_HZ: Serial.println("8 Hz"); break;
+        case MLX90640_16_HZ: Serial.println("16 Hz"); break;
+        case MLX90640_32_HZ: Serial.println("32 Hz"); break;
+        case MLX90640_64_HZ: Serial.println("64 Hz"); break;
+    }
+}
+
 void setup() {
-  //while (!Serial) delay(10);
-  Serial.begin(115200);
-  delay(100);
+    //while (!Serial) delay(10);
+    Serial.begin(115200);
+    delay(100);
 
-  tft.init(240, 240);   // initialize a ST7789 chip, 240x240 pixels
-  tft.setTextWrap(false); // Allow text to run off right edge
-  tft.fillScreen(ST77XX_BLACK);
-  tft.enableDisplay(true);
-  tft.setRotation(2);
-  tft.setCursor(0, 30);
-    tft.setTextColor(ST77XX_RED);
-    tft.setTextSize(1);
-    tft.println("Hello World!");
-    tft.setTextColor(ST77XX_YELLOW);
-    tft.setTextSize(2);
-    tft.println("Hello World!");
-    tft.setTextColor(ST77XX_GREEN);
-    tft.setTextSize(3);
-    tft.println("Hello World!");
-    tft.setTextColor(ST77XX_BLUE);
-    tft.setTextSize(4);
-    tft.print(1234.567);
+    tft.init(240, 240);   // initialize a ST7789 chip, 240x240 pixels
+    tft.setTextWrap(false); // Allow text to run off right edge
+    tft.fillScreen(ST77XX_BLACK);
+    tft.enableDisplay(true);
+    tft.setRotation(2);
+  
     for (int i=0;i<10;i++)
-        tft.drawRGBBitmap(0, 200+i, camColors, 240, 1);
+        tft.drawRGBBitmap(0, 200+i, &camColors[5], 240, 1);
+
+    Serial.println("Adafruit MLX90640 Simple Test");
+    Wire.setClock(1000000);
+    if (! mlx.begin(MLX90640_I2CADDR_DEFAULT, &Wire)) {
+        Serial.println("MLX90640 not found!");
+        while (1) delay(10);
+    }
+    Wire.setClock(1000000);
+    Serial.println("Found Adafruit MLX90640");
+
+    Serial.print("Serial number: ");
+    Serial.print(mlx.serialNumber[0], HEX);
+    Serial.print(mlx.serialNumber[1], HEX);
+    Serial.println(mlx.serialNumber[2], HEX);
     
+    //mlx.setMode(MLX90640_INTERLEAVED);
+    mlx.setMode(MLX90640_CHESS);
+    
+    mlx.setResolution(MLX90640_ADC_16BIT);
+    mlx.setRefreshRate(MLX90640_16_HZ);
 
-  Serial.println("Adafruit MLX90640 Simple Test");
-  if (! mlx.begin(MLX90640_I2CADDR_DEFAULT, &Wire)) {
-    Serial.println("MLX90640 not found!");
-    while (1) delay(10);
-  }
-  Serial.println("Found Adafruit MLX90640");
-
-  Serial.print("Serial number: ");
-  Serial.print(mlx.serialNumber[0], HEX);
-  Serial.print(mlx.serialNumber[1], HEX);
-  Serial.println(mlx.serialNumber[2], HEX);
-  
-  //mlx.setMode(MLX90640_INTERLEAVED);
-  mlx.setMode(MLX90640_CHESS);
-  Serial.print("Current mode: ");
-  if (mlx.getMode() == MLX90640_CHESS) {
-    Serial.println("Chess");
-  } else {
-    Serial.println("Interleave");    
-  }
-
-  mlx.setResolution(MLX90640_ADC_16BIT);
-  Serial.print("Current resolution: ");
-  mlx90640_resolution_t res = mlx.getResolution();
-  switch (res) {
-    case MLX90640_ADC_16BIT: Serial.println("16 bit"); break;
-    case MLX90640_ADC_17BIT: Serial.println("17 bit"); break;
-    case MLX90640_ADC_18BIT: Serial.println("18 bit"); break;
-    case MLX90640_ADC_19BIT: Serial.println("19 bit"); break;
-  }
-
-  mlx.setRefreshRate(MLX90640_16_HZ);
-  Serial.print("Current frame rate: ");
-  mlx90640_refreshrate_t rate = mlx.getRefreshRate();
-  switch (rate) {
-    case MLX90640_0_5_HZ: Serial.println("0.5 Hz"); break;
-    case MLX90640_1_HZ: Serial.println("1 Hz"); break; 
-    case MLX90640_2_HZ: Serial.println("2 Hz"); break;
-    case MLX90640_4_HZ: Serial.println("4 Hz"); break;
-    case MLX90640_8_HZ: Serial.println("8 Hz"); break;
-    case MLX90640_16_HZ: Serial.println("16 Hz"); break;
-    case MLX90640_32_HZ: Serial.println("32 Hz"); break;
-    case MLX90640_64_HZ: Serial.println("64 Hz"); break;
-  }
-
-  
+    printMLX_current_settings();
 }
 
 float minTemp = 0.0f;
@@ -143,21 +137,110 @@ void getMinMaxTemps()
     }
 }
 
+#define INTERPOLATED_COLS 224
+#define INTERPOLATED_ROWS 168
+float dest_2d[INTERPOLATED_ROWS * INTERPOLATED_COLS];
 
+uint16_t dest_RGB565_map[INTERPOLATED_ROWS * INTERPOLATED_COLS];
 
-void loop() {
-    //delay(100);
-    unsigned long myTime = millis();
-    int read_status = mlx.getFrame(frame);
-    if (read_status != 0) {
-        Serial.printf("Failed:%d", read_status);
-        return;
+void convertToImage(float *src, uint16_t *dest, uint8_t rows, uint8_t cols)
+{
+    for (uint8_t r=0; r<rows; r++) {
+        for (uint8_t c=0; c<cols; c++) {
+            int index = r*cols + c;
+            float t = src[index];
+            uint8_t colorIndex = map(t, minTemp, maxTemp, 0, 255);
+            colorIndex = constrain(colorIndex, 0, 255);
+            dest[index] = camColors[colorIndex];
+        }
     }
-    //Serial.printf("mlx.getFrame time:%d\n",(millis()-myTime));
-    //Serial.println();
-    //Serial.println();
-    getMinMaxTemps();
+}
+
+void tft_draw_Interpolated(float *src, int16_t rows, int16_t cols)
+{
+    tft.startWrite();
+    tft.setAddrWindow(0, 0, cols, rows);
+    for (int16_t r=0; r<rows; r++) {
+        for (int16_t c=cols-1; c>=0; c--) { // draw cols in reverse order because data from MLX is reversed
+            int index = r*cols + c;
+            float t = src[index];
+            uint8_t colorIndex = constrain(map(t, minTemp, maxTemp, 0, 255), 0, 255);
+            uint16_t color = camColors[colorIndex];
+
+            tft.SPI_WRITE16(color);
+        }
+    }
     
+    tft.endWrite();
+}
+
+void clearDest()
+{
+    for (int i=0;i<INTERPOLATED_ROWS*INTERPOLATED_COLS;i++)
+        dest_2d[i] = 0.0f;
+}
+
+void tft_printBiqubicInterpolated()
+{
+    //t = millis();
+    clearDest();
+    interpolate_image(frame, 24, 32, dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+    //Serial.print("Interpolation took "); Serial.print(millis()-t); Serial.println(" ms");
+    //t = millis();
+    tft_draw_Interpolated(dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS); // this takes almost the same time ~34mS as the following two, but would not require additional ram usage
+    //convertToImage(dest_2d, dest_RGB565_map, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+    //tft.drawRGBBitmap(0,0, dest_RGB565_map, INTERPOLATED_COLS, INTERPOLATED_ROWS);
+    //Serial.print("Interpolation draw took "); Serial.print(millis()-t); Serial.println(" ms");
+}
+
+void tft_printNonInterpolated()
+{
+    for (uint8_t h=0; h<24; h++) {
+        for (uint8_t w=0; w<32; w++) {
+            float t = frame[h*32 + w];
+            uint8_t colorIndex = map(t, minTemp, maxTemp, 0, 255);
+            colorIndex = constrain(colorIndex, 0, 255);
+            tft.fillRect((32-w)*7, h*7, 7, 7, camColors[colorIndex]);
+        }
+    }
+}
+
+void serial_printTempValues()
+{
+    for (uint8_t h=0; h<24; h++) {
+        for (uint8_t w=0; w<32; w++) {
+            float t = frame[h*32 + w];
+            Serial.print(t, 1);
+            Serial.print(", ");
+        }
+        Serial.println();
+    }
+}
+
+void serial_printAsASCIIART()
+{
+    //Serial.println();
+    //Serial.println();
+    for (uint8_t h=0; h<24; h++) {
+        for (uint8_t w=0; w<32; w++) {
+            float t = frame[h*32 + w];
+            if (t < 20) Serial.print("  ");// c = ' ';
+            else if (t < 23) Serial.print("..");// c = '.';
+            else if (t < 25) Serial.print("--");// c = '-';
+            else if (t < 27) Serial.print("**");// c = '*';
+            else if (t < 29) Serial.print("++");// c = '+';
+            else if (t < 31) Serial.print("xx");// c = 'x';
+            else if (t < 33) Serial.print("%%");// c = '%';
+            else if (t < 35) Serial.print("##");// c = '#';
+            else if (t < 37) Serial.print("XX");// c = 'X';
+            else Serial.print("&&");
+        }
+        Serial.println();
+    }
+}
+
+void tft_printMaxMin()
+{
     // clear prev text
     tft.fillRect(0, 180, 84, 14, ST77XX_BLACK);
     tft.fillRect(180, 180, 60, 14, ST77XX_BLACK);
@@ -169,38 +252,40 @@ void loop() {
     tft.print(minTemp);
     tft.setCursor(180, 180);
     tft.print(maxTemp);
-
-    
-    for (uint8_t h=0; h<24; h++) {
-        for (uint8_t w=0; w<32; w++) {
-            float t = frame[h*32 + w];
-#ifdef PRINT_TFT
-            uint8_t colorIndex = map(t, minTemp, maxTemp, 0, 255);
-            colorIndex = constrain(colorIndex, 0, 255);
-
-            tft.fillRect(w*7, h*7, 7, 7, camColors[colorIndex]);
-#endif
-// keep the following for debugging purposes
-#ifdef PRINT_TEMPERATURES
-            Serial.print(t, 1);
-            Serial.print(", ");
-#endif
-#ifdef PRINT_ASCIIART
-            //char c = '&';
-            if (t < 20) Serial.print("  ");// c = ' ';
-            else if (t < 23) Serial.print("..");// c = '.';
-            else if (t < 25) Serial.print("--");// c = '-';
-            else if (t < 27) Serial.print("**");// c = '*';
-            else if (t < 29) Serial.print("++");// c = '+';
-            else if (t < 31) Serial.print("xx");// c = 'x';
-            else if (t < 33) Serial.print("%%");// c = '%';
-            else if (t < 35) Serial.print("##");// c = '#';
-            else if (t < 37) Serial.print("XX");// c = 'X';
-            else Serial.print("&&");
-#endif
-        }
-#if defined(PRINT_ASCIIART) || defined(PRINT_TEMPERATURES)
-        Serial.println();
-#endif
+}
+int read_status = 0;
+uint32_t fps = 0;
+void loop() {
+    //delay(100);
+    fps = millis();
+    //t = millis();
+    if (read_status != 0) tft.fillRect(0, 220, 240, 14, ST77XX_BLACK);
+    read_status = mlx.getFrame(frame);
+    if (read_status != 0) {
+        Serial.printf("Failed:%d", read_status);
+        tft.fillRect(0, 220, 240, 14, ST77XX_BLACK);
+        tft.setTextSize(2);
+        tft.setTextColor(ST77XX_RED);
+        tft.setCursor(0, 220);
+        tft.printf("MLX Failed:%d", read_status);
+        return;
     }
+    //Serial.printf("mlx.getFrame time:%d\n",(millis()-t));
+    
+    getMinMaxTemps();
+    
+    //t = millis();
+    tft_printMaxMin();
+    tft_printBiqubicInterpolated();
+    //tft_printNonInterpolated();
+    //serial_printTempValues();
+    //serial_printAsASCIIART();
+
+    //Serial.print("Redraw took "); Serial.print(millis()-t); Serial.println(" ms");
+
+    fps = (1000/(millis()-fps));
+    tft.setTextSize(1);
+    tft.fillRect(0, 230, 60, 14, ST77XX_BLACK);
+    tft.setCursor(0, 230);
+    tft.printf("fps:%d", fps);
 }
