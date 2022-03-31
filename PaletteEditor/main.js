@@ -32,6 +32,12 @@ var COLOR = {
     MAGENTA_RED:0xCC0077,
     DARKBLUE:0x20008C,
     BLACK:0x000000,
+    RED:0xFF0000,
+    YELLOW:0xFFFF00,
+    GREEN:0x00FF00,
+    CYAN:0x00FFFF,
+    BLUE:0x0000FF,
+    MAGENTA:0xFF00FF
 }
 
 function createAndAddGradient(count, color1, color2) {
@@ -95,13 +101,13 @@ function drawIronBow() {
 }
 
 function drawRainBow() {
-    var mult = 36.5;
-    createAndAddGradient(mult, "#000", "#00F");
-    createAndAddGradient(mult, "#00F", "#0FF");
-    createAndAddGradient(mult, "#0FF", "#0F0");
-    createAndAddGradient(mult, "#0F0", "#FF0");
-    createAndAddGradient(mult, "#FF0", "#F00");
-    createAndAddGradient(mult, "#F00", "#FFF");
+    var mult = 20;
+    createAndAddGradient(mult, "#000", "#00F"); // black to blue
+    createAndAddGradient(mult, "#00F", "#0FF"); // blue to cyan
+    createAndAddGradient(mult, "#0FF", "#0F0"); // cyan to green
+    createAndAddGradient(mult, "#0F0", "#FF0"); // green to yellow
+    createAndAddGradient(mult, "#FF0", "#F00"); // green to red
+    createAndAddGradient(mult, "#F00", "#FFF"); // red to white
     document.body.appendChild(document.createElement("br"));
 }
 
@@ -123,47 +129,70 @@ function convertToFlatRGB(colors)
 }
 
 
-function drawFromKeyColors(keyColors, keyProcents, totalRange) {
+function drawFromKeyColors(gradient, totalRange) {
+    var keyColors = gradient.keyColors;
+    var keyProcents = gradient.keyProcents;
     var keyRanges = new Int32Array(keyProcents.length);
-    var currRange = 0;
+    //var currRange = 0;
     for (var i = 0; i < (keyProcents.length-1); i++)
     {
-        currRange += parseInt((totalRange * keyProcents[i]) / 100);
-        keyRanges[i] = currRange;
+        //currRange += parseInt((totalRange * keyProcents[i]) / 100);
+        keyRanges[i] = parseInt((totalRange * keyProcents[i]) / 100);
     }
-    // make sure that the last range item is equal to totalRange-1
+    // make sure that the last range item allways is equal to totalRange-1
     keyRanges[keyRanges.length-1] = (totalRange-1);
     
-    console.log("keyProcents:", keyProcents);
-    console.log("keyRanges:", keyRanges);
+    //console.log("keyProcents:", keyProcents);
+    //console.log("keyRanges:", keyRanges);
     for (var i = 0; i < keyColors.length; i++)
     {
         keyColors[i] = CRGB.FROM_VALUE(keyColors[i]);
     }
-    console.log("keyColors:",keyColors);
+    //console.log("keyColors:",keyColors);
     var colorMap = [];
     for (var i = 0; i < (keyColors.length-1); i++)
     {
        fill_gradient_RGB(colorMap, keyRanges[i], keyColors[i], keyRanges[i+1], keyColors[i+1]);
     }
-    console.log(colorMap);
+    //console.log(colorMap);
     var rgbData = convertToFlatRGB(colorMap);
     printRGBdata(rgbData);
 }
 
-function main() {
-    var keyColors = [COLOR.BLACK, COLOR.DARKBLUE, COLOR.MAGENTA_RED, COLOR.ORANGE, COLOR.GOLD, COLOR.WHITE];
-    var keyProcents = [0, 10, 25, 35, 15, 15]; // in procents of 100
+var IronBow = {
+    keyColors:[COLOR.BLACK, COLOR.DARKBLUE, COLOR.MAGENTA_RED, COLOR.ORANGE, COLOR.GOLD, COLOR.WHITE],
+    keyProcents:[0, 10, 35, 70, 85, 100]
+}; 
 
+var RainBow = {
+    keyColors:[COLOR.BLACK, COLOR.BLUE, COLOR.CYAN, COLOR.GREEN, COLOR.YELLOW, COLOR.RED, COLOR.WHITE],
+    keyProcents:[0,         100/6,         200/6,         300/6,          400/6,           500/6,        100],
+};
+
+var RainBow2 = [
+    {p:0, c:COLOR.BLACK},
+    {p:100/6, c:COLOR.BLUE},
+    {p:200/6, c:COLOR.CYAN},
+    {p:300/6, c:COLOR.GREEN},
+    {p:400/6, c:COLOR.YELLOW},
+    {p:500/6, c:COLOR.RED},
+    {p:100, c:COLOR.WHITE}
+];
+
+function main() {
+    
     drawIronBow();
-    drawFromKeyColors(keyColors, keyProcents, 240);
+    drawFromKeyColors(IronBow, 240);
+
+    drawRainBow();
+    drawFromKeyColors(RainBow, 240);
     
     //testDifferentGradientGenerators();
     
     printRGBdata(colorMap_arctic);
     printRGBdata(colorMap_glowBow);
     
-    drawRainBow();
+    
     printRGBdata(colorMap_wheel1);
 
     
