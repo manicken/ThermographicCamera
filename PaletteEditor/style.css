@@ -1,0 +1,11 @@
+canvas {
+    border-style:solid;
+    border-width:1px;
+    padding:0px;
+    margin:0px;
+    background-color:#AAA;
+}
+
+body {
+    background-color:#555;
+}
