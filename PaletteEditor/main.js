@@ -85,7 +85,7 @@ function printRGBdata(rgbData) {
 }
 
 function drawIronBow() {
-    var mult = 24; // calculated from 240/(1+2.5+3.5+1.5+1.5)=240/10=24
+    var mult = 12; // calculated from 240/(1+2.5+3.5+1.5+1.5)=240/10=24
     createAndAddGradient((2 / 2) * mult, "black", "#20008c"); // 2
     createAndAddGradient((5 / 2) * mult, "#20008c", "#c07"); // 4
     createAndAddGradient((7 / 2) * mult, "#c07", "orange"); // 8
@@ -124,13 +124,16 @@ function convertToFlatRGB(colors)
 
 
 function drawFromKeyColors(keyColors, keyProcents, totalRange) {
-    var keyRanges = [];
+    var keyRanges = new Int32Array(keyProcents.length);
     var currRange = 0;
-    for (var i = 0; i < keyProcents.length; i++)
+    for (var i = 0; i < (keyProcents.length-1); i++)
     {
         currRange += parseInt((totalRange * keyProcents[i]) / 100);
-        keyRanges.push(currRange);
+        keyRanges[i] = currRange;
     }
+    // make sure that the last range item is equal to totalRange-1
+    keyRanges[keyRanges.length-1] = (totalRange-1);
+    
     console.log("keyProcents:", keyProcents);
     console.log("keyRanges:", keyRanges);
     for (var i = 0; i < keyColors.length; i++)
@@ -153,7 +156,7 @@ function main() {
     var keyProcents = [0, 10, 25, 35, 15, 15]; // in procents of 100
 
     drawIronBow();
-    drawFromKeyColors(keyColors, keyProcents, 480);
+    drawFromKeyColors(keyColors, keyProcents, 240);
     
     //testDifferentGradientGenerators();
     
