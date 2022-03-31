@@ -2,9 +2,9 @@ class CRGB
 {
 	constructor(red,green,blue)
     {
-    	this.r = red;
-        this.g = green;
-        this.b = blue;
+    	this.r = parseInt(red);
+        this.g = parseInt(green);
+        this.b = parseInt(blue);
     }
     /*constructor (crgb)
     {
@@ -14,52 +14,6 @@ class CRGB
     }*/
 }
 
-function fill_gradient_RGB( colorMap,
-                   startpos, startcolor,
-                   endpos, endcolor )
-{
-    // if the points are in the wrong order, straighten them
-    /*if( endpos < startpos ) {
-        var t = endpos;
-        CRGB tc = endcolor;
-        endcolor = startcolor;
-        endpos = startpos;
-        startpos = t;
-        startcolor = tc;
-    }*/
-
-    var rdistance87;
-    var gdistance87;
-    var bdistance87;
-
-    rdistance87 = (endcolor.r - startcolor.r) << 7;
-    gdistance87 = (endcolor.g - startcolor.g) << 7;
-    bdistance87 = (endcolor.b - startcolor.b) << 7;
-
-    var pixeldistance = endpos - startpos;
-    var divisor = pixeldistance ? pixeldistance : 1;
-
-    var rdelta87 = parseInt(rdistance87 / divisor); 
-    var gdelta87 = parseInt(gdistance87 / divisor);
-    var bdelta87 = parseInt(bdistance87 / divisor);
-
-    rdelta87 *= 2;
-    gdelta87 *= 2;
-    bdelta87 *= 2;
-
-    var r88 = startcolor.r << 8;
-    var g88 = startcolor.g << 8;
-    var b88 = startcolor.b << 8;
-    for( var i = startpos; i <= endpos; ++i) {
-        colorMap[i] = new CRGB( r88 >> 8, g88 >> 8, b88 >> 8);
-        r88 += rdelta87;
-        g88 += gdelta87;
-        b88 += bdelta87;
-    }
-}
-var colorMap = [];
-fill_gradient_RGB(colorMap, 0, new CRGB(0,0,0), 15, new CRGB(255,255,255) )
-console.log(colorMap);
 
 function createAndAddGradient(count, color1, color2) {
     var height = 40;
@@ -131,8 +85,19 @@ function drawRainBow() {
     document.body.appendChild(document.createElement("br"));
 }
 function main() {
-    var newData = getRGBdata(0,0,0,0,0,10,11);
-    console.log(newData);
+    var colorMap = [];
+    getRGBdata(colorMap,0,0,1,0,255,255,16);
+    console.log(colorMap);
+
+    var colorMap = [];
+    fill_gradient_RGB(colorMap, 0, new CRGB(0,0,1), 15, new CRGB(0,255,255) )
+    console.log(colorMap);
+    console.log(typeof new CRGB(0,0,0));
+
+    var colorMap = [];
+    fill_gradient_RGB_lowres(colorMap, 0, new CRGB(0,0,1), 15, new CRGB(0,255,255) )
+    console.log(colorMap);
+    console.log(typeof new CRGB(0,0,0));
     
     printRGBdata(colorMap_arctic);
     printRGBdata(colorMap_glowBow);
