@@ -29,6 +29,7 @@ function fill_gradient_RGB( colorMap,
     startpos, startcolor,
     endpos, endcolor )
 {
+    console.log("startpos:" + startpos + ", endpos:" + endpos + ", startColor:", startcolor, ", endcolor:", endcolor);
     // if the points are in the wrong order, straighten them
     /*if( endpos < startpos ) {
     var t = endpos;
@@ -47,7 +48,7 @@ function fill_gradient_RGB( colorMap,
     gdistance87 = (endcolor.g - startcolor.g) << 7;
     bdistance87 = (endcolor.b - startcolor.b) << 7;
 
-    console.log(typeof rdistance87 + rdistance87);
+    //console.log(typeof rdistance87 + rdistance87);
 
     var pixeldistance = endpos - startpos;
     var divisor = pixeldistance ? pixeldistance : 1;
@@ -60,7 +61,7 @@ function fill_gradient_RGB( colorMap,
     gdelta87 *= 2;
     bdelta87 *= 2;
 
-    console.log("rdelta87:" + rdelta87 + ", gdelta87:" + gdelta87 + ", bdelta87:" + bdelta87);
+    //console.log("rdelta87:" + rdelta87 + ", gdelta87:" + gdelta87 + ", bdelta87:" + bdelta87);
 
     var r88 = startcolor.r << 8;
     var g88 = startcolor.g << 8;
@@ -102,7 +103,7 @@ function fill_gradient_RGB_lowres( colorMap,
     gdistance87 = (endcolor.g - startcolor.g);
     bdistance87 = (endcolor.b - startcolor.b);
 
-    console.log(typeof rdistance87 + rdistance87);
+    //console.log(typeof rdistance87 + rdistance87);
 
     var pixeldistance = endpos - startpos;
     var divisor = pixeldistance ? pixeldistance : 1;
@@ -115,7 +116,7 @@ function fill_gradient_RGB_lowres( colorMap,
     //gdelta87 *= 2;
     //bdelta87 *= 2;
 
-    console.log("rdelta87:" + rdelta87 + ", gdelta87:" + gdelta87 + ", bdelta87:" + bdelta87);
+    //console.log("rdelta87:" + rdelta87 + ", gdelta87:" + gdelta87 + ", bdelta87:" + bdelta87);
 
     var r88 = startcolor.r;
     var g88 = startcolor.g;

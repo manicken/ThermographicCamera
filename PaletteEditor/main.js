@@ -12,14 +12,33 @@ class CRGB
         this.g = crgb.g;
         this.b = crgb.b;
     }*/
+
+    static FROM_VALUE(value)
+    {
+        return new CRGB((value >> 16) & 0xFF,
+                        (value >> 8) & 0xFF,
+                        value & 0xFF)
+    }
+    asArray()
+    {
+        return [this.r,this.g,this.b];
+    }
 }
 
+var COLOR = {
+    WHITE:0xFFFFFF,
+    GOLD:0xFFD700,
+    ORANGE:0xFFA500,
+    MAGENTA_RED:0xCC0077,
+    DARKBLUE:0x20008C,
+    BLACK:0x000000,
+}
 
 function createAndAddGradient(count, color1, color2) {
     var height = 40;
     count *= 4;
     var ele = document.createElement("canvas");
-
+    ele.setAttribute("class", "gradient");
     document.body.appendChild(ele);
     ele.setAttribute("width", count);
     ele.setAttribute("height", height);
@@ -45,6 +64,7 @@ function putRGBdata(rgb, imageData, doubles) {
         }
     }
 }
+
 function printRGBdata(rgbData) {
     var scale = 2;
     var doubles = 20;
@@ -84,7 +104,74 @@ function drawRainBow() {
     createAndAddGradient(mult, "#F00", "#FFF");
     document.body.appendChild(document.createElement("br"));
 }
+
+/**
+ * 
+ * @param {CRGB[]} colors 
+ * @returns {Uint8ClampedArray}
+ */
+function convertToFlatRGB(colors)
+{
+    var out = new Uint8ClampedArray(colors.length*3);
+    for (var i=0;i<colors.length;i++)
+    {
+        out[i*3] = colors[i].r;
+        out[i*3+1] = colors[i].g; 
+        out[i*3+2] = colors[i].b; 
+    }
+    return out;
+}
+
+
+function drawFromKeyColors(keyColors, keyProcents, totalRange) {
+    var keyRanges = [];
+    var currRange = 0;
+    for (var i = 0; i < keyProcents.length; i++)
+    {
+        currRange += parseInt((totalRange * keyProcents[i]) / 100);
+        keyRanges.push(currRange);
+    }
+    console.log("keyProcents:", keyProcents);
+    console.log("keyRanges:", keyRanges);
+    for (var i = 0; i < keyColors.length; i++)
+    {
+        keyColors[i] = CRGB.FROM_VALUE(keyColors[i]);
+    }
+    console.log("keyColors:",keyColors);
+    var colorMap = [];
+    for (var i = 0; i < (keyColors.length-1); i++)
+    {
+       fill_gradient_RGB(colorMap, keyRanges[i], keyColors[i], keyRanges[i+1], keyColors[i+1]);
+    }
+    console.log(colorMap);
+    var rgbData = convertToFlatRGB(colorMap);
+    printRGBdata(rgbData);
+}
+
 function main() {
+    var keyColors = [COLOR.BLACK, COLOR.DARKBLUE, COLOR.MAGENTA_RED, COLOR.ORANGE, COLOR.GOLD, COLOR.WHITE];
+    var keyProcents = [0, 10, 25, 35, 15, 15]; // in procents of 100
+
+    drawIronBow();
+    drawFromKeyColors(keyColors, keyProcents, 480);
+    
+    //testDifferentGradientGenerators();
+    
+    printRGBdata(colorMap_arctic);
+    printRGBdata(colorMap_glowBow);
+    
+    drawRainBow();
+    printRGBdata(colorMap_wheel1);
+
+    
+
+    //console.log(CRGB.FROM_VALUE(0xFF1112));
+}
+document.addEventListener("DOMContentLoaded", main());
+
+
+function testDifferentGradientGenerators()
+{
     var colorMap = [];
     getRGBdata(colorMap,0,0,1,0,255,255,16);
     console.log(colorMap);
@@ -92,17 +179,8 @@ function main() {
     var colorMap = [];
     fill_gradient_RGB(colorMap, 0, new CRGB(0,0,1), 15, new CRGB(0,255,255) )
     console.log(colorMap);
-    console.log(typeof new CRGB(0,0,0));
 
     var colorMap = [];
     fill_gradient_RGB_lowres(colorMap, 0, new CRGB(0,0,1), 15, new CRGB(0,255,255) )
     console.log(colorMap);
-    console.log(typeof new CRGB(0,0,0));
-    
-    printRGBdata(colorMap_arctic);
-    printRGBdata(colorMap_glowBow);
-    drawIronBow();
-    drawRainBow();
-    printRGBdata(colorMap_wheel1);
 }
-document.addEventListener("DOMContentLoaded", main());
