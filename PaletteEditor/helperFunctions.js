@@ -1,5 +1,8 @@
+
+
+
 function scaleImageData(c, imageData, scale) {
-    var scaled = c.createImageData(imageData.width * scale, imageData.height * scale);
+    var scaled = c.createImageData(parseInt(imageData.width * scale), parseInt(imageData.height * scale));
   
     for(var row = 0; row < imageData.height; row++) {
       for(var col = 0; col < imageData.width; col++) {

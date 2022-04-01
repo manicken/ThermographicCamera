@@ -25,20 +25,7 @@ class CRGB
     }
 }
 
-var COLOR = {
-    WHITE:0xFFFFFF,
-    GOLD:0xFFD700,
-    ORANGE:0xFFA500,
-    MAGENTA_RED:0xCC0077,
-    DARKBLUE:0x20008C,
-    BLACK:0x000000,
-    RED:0xFF0000,
-    YELLOW:0xFFFF00,
-    GREEN:0x00FF00,
-    CYAN:0x00FFFF,
-    BLUE:0x0000FF,
-    MAGENTA:0xFF00FF
-}
+
 
 function createAndAddGradient(count, color1, color2) {
     var height = 40;
@@ -71,23 +58,23 @@ function putRGBdata(rgb, imageData, doubles) {
     }
 }
 
-function printRGBdata(rgbData) {
-    var scale = 2;
-    var doubles = 20;
+function printRGBdata(rgbData, options={scale:1, doubles:20}) {
+    var scale = options.scale;
+    var doubles = options.doubles;
     var width = rgbData.length / 3;
     var ele = document.createElement("canvas");
     document.body.appendChild(ele);
     document.body.appendChild(document.createElement("br"));
-    ele.setAttribute("width", width * scale);
-    ele.setAttribute("height", doubles * scale);
+    ele.setAttribute("width", parseInt(width * scale));
+    ele.setAttribute("height", parseInt(doubles * scale));
     var ctx = ele.getContext("2d");
+    
     var imageData = ctx.createImageData(width, doubles);
 
     putRGBdata(rgbData, imageData, doubles)
     if (scale > 1)
         imageData = scaleImageData(ctx, imageData, scale);
     ctx.putImageData(imageData, 0, 0);
-
 }
 
 function drawIronBow() {
@@ -129,26 +116,24 @@ function convertToFlatRGB(colors)
 }
 
 
-function drawFromKeyColors(gradient, totalRange) {
-    var keyColors = gradient.keyColors;
-    var keyProcents = gradient.keyProcents;
-    var keyRanges = new Int32Array(keyProcents.length);
+function drawFromKeyColors(gradients, totalRange) {
+    var keyColors = [];//gradients.keyColors;
+    var keyProcents = [];//gradients.keyProcents;
+    var keyRanges = new Int32Array(gradients.length);
     //var currRange = 0;
-    for (var i = 0; i < (keyProcents.length-1); i++)
+    for (var i = 0; i < gradients.length; i++)
     {
         //currRange += parseInt((totalRange * keyProcents[i]) / 100);
-        keyRanges[i] = parseInt((totalRange * keyProcents[i]) / 100);
+        keyRanges[i] = parseInt((totalRange * gradients[i].p) / 100);
+        keyColors[i] = CRGB.FROM_VALUE(gradients[i].c);
     }
     // make sure that the last range item allways is equal to totalRange-1
-    keyRanges[keyRanges.length-1] = (totalRange-1);
+    keyRanges[gradients.length-1] = (totalRange-1);
     
     //console.log("keyProcents:", keyProcents);
     //console.log("keyRanges:", keyRanges);
-    for (var i = 0; i < keyColors.length; i++)
-    {
-        keyColors[i] = CRGB.FROM_VALUE(keyColors[i]);
-    }
     //console.log("keyColors:",keyColors);
+
     var colorMap = [];
     for (var i = 0; i < (keyColors.length-1); i++)
     {
@@ -156,28 +141,8 @@ function drawFromKeyColors(gradient, totalRange) {
     }
     //console.log(colorMap);
     var rgbData = convertToFlatRGB(colorMap);
-    printRGBdata(rgbData);
+    printRGBdata(rgbData, {scale:2,doubles:20});
 }
-
-var IronBow = {
-    keyColors:[COLOR.BLACK, COLOR.DARKBLUE, COLOR.MAGENTA_RED, COLOR.ORANGE, COLOR.GOLD, COLOR.WHITE],
-    keyProcents:[0, 10, 35, 70, 85, 100]
-}; 
-
-var RainBow = {
-    keyColors:[COLOR.BLACK, COLOR.BLUE, COLOR.CYAN, COLOR.GREEN, COLOR.YELLOW, COLOR.RED, COLOR.WHITE],
-    keyProcents:[0,         100/6,         200/6,         300/6,          400/6,           500/6,        100],
-};
-
-var RainBow2 = [
-    {p:0, c:COLOR.BLACK},
-    {p:100/6, c:COLOR.BLUE},
-    {p:200/6, c:COLOR.CYAN},
-    {p:300/6, c:COLOR.GREEN},
-    {p:400/6, c:COLOR.YELLOW},
-    {p:500/6, c:COLOR.RED},
-    {p:100, c:COLOR.WHITE}
-];
 
 function addHeader(text)
 {
@@ -187,21 +152,37 @@ function addHeader(text)
 }
 
 function main() {
-    
+    var width = 240;
     drawIronBow();
-    drawFromKeyColors(IronBow, 240);
+    drawFromKeyColors(IronBow, width);
 
     drawRainBow();
-    drawFromKeyColors(RainBow, 240);
+    drawFromKeyColors(RainBow, width);
     
-    //testDifferentGradientGenerators();
-    for (var i = 0; i < color_schemes.length; i++) {
+    printRGBdata(colorMap_arctic, {scale:2,doubles:20});
+    drawFromKeyColors(arctic, colorMap_arctic.length/3);
+
+    printRGBdata(colorMap_blackHot, {scale:2,doubles:20});
+    drawFromKeyColors(blackHot, colorMap_blackHot.length/3);
+
+    printRGBdata(colorMap_blueRed, {scale:2,doubles:20});
+    drawFromKeyColors(blueRed, colorMap_blueRed.length/3);
+
+    printRGBdata(colorMap_coldest, {scale:2,doubles:20});
+    drawFromKeyColors(coldest, colorMap_coldest.length/3);
+
+    printRGBdata(colorMap_contrast, {scale:2,doubles:20});
+    drawFromKeyColors(contrast, colorMap_contrast.length/3);
+    
+    var options = {scale:1,doubles:20};
+    for (var i = 5; i < color_schemes.length; i++) {
         
-        addHeader(color_schemes[i].name);
-        printRGBdata(color_schemes[i].map);
+        addHeader(color_schemes[i].name + "&nbsp;&nbsp;&nbsp;&nbsp;width:" + color_schemes[i].map.length/3);
+        printRGBdata(color_schemes[i].map, options);
     }
   
-
+    // ### dev tests ###
+    //testDifferentGradientGenerators();
     //console.log(CRGB.FROM_VALUE(0xFF1112));
 }
 document.addEventListener("DOMContentLoaded", main());
