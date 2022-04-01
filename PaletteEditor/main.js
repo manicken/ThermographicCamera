@@ -152,34 +152,10 @@ function addHeader(text)
 }
 
 function main() {
-    var width = 240;
-    drawIronBow();
-    drawFromKeyColors(IronBow, width);
-
-    drawRainBow();
-    drawFromKeyColors(RainBow, width);
     
-    printRGBdata(colorMap_arctic, {scale:2,doubles:20});
-    drawFromKeyColors(arctic, colorMap_arctic.length/3);
+    printAll_ToCompare();
 
-    printRGBdata(colorMap_blackHot, {scale:2,doubles:20});
-    drawFromKeyColors(blackHot, colorMap_blackHot.length/3);
-
-    printRGBdata(colorMap_blueRed, {scale:2,doubles:20});
-    drawFromKeyColors(blueRed, colorMap_blueRed.length/3);
-
-    printRGBdata(colorMap_coldest, {scale:2,doubles:20});
-    drawFromKeyColors(coldest, colorMap_coldest.length/3);
-
-    printRGBdata(colorMap_contrast, {scale:2,doubles:20});
-    drawFromKeyColors(contrast, colorMap_contrast.length/3);
-    
-    var options = {scale:1,doubles:20};
-    for (var i = 5; i < color_schemes.length; i++) {
-        
-        addHeader(color_schemes[i].name + "&nbsp;&nbsp;&nbsp;&nbsp;width:" + color_schemes[i].map.length/3);
-        printRGBdata(color_schemes[i].map, options);
-    }
+    //printAll_ReferenceColorSchemes();
   
     // ### dev tests ###
     //testDifferentGradientGenerators();
@@ -187,6 +163,100 @@ function main() {
 }
 document.addEventListener("DOMContentLoaded", main());
 
+function printAll_ToCompare()
+{
+    var width = 240;
+    addHeader("IronBox (own)");
+    drawIronBow();
+    drawFromKeyColors(gp.IronBow, width);
+
+    addHeader("RainBow (own)");
+    drawRainBow();
+    drawFromKeyColors(gp.RainBow, width);
+    
+    addHeader("arctic");
+    printRGBdata(colorMap_arctic, {scale:2,doubles:20});
+    drawFromKeyColors(gp.arctic, colorMap_arctic.length/3);
+
+    addHeader("blackHot");
+    printRGBdata(colorMap_blackHot, {scale:2,doubles:20});
+    drawFromKeyColors(gp.blackHot, colorMap_blackHot.length/3);
+
+    addHeader("blueRed");
+    printRGBdata(colorMap_blueRed, {scale:2,doubles:20});
+    drawFromKeyColors(gp.blueRed, colorMap_blueRed.length/3);
+
+    addHeader("coldest");
+    printRGBdata(colorMap_coldest, {scale:2,doubles:20});
+    drawFromKeyColors(gp.coldest, colorMap_coldest.length/3);
+
+    addHeader("contrast");
+    printRGBdata(colorMap_contrast, {scale:2,doubles:20});
+    drawFromKeyColors(gp.contrast, colorMap_contrast.length/3);
+
+    addHeader("doubleRainbow");
+    printRGBdata(colorMap_doubleRainbow, {scale:2,doubles:20});
+    drawFromKeyColors(gp.doubleRainbow, colorMap_doubleRainbow.length/3);
+
+    addHeader("glowBow");
+    printRGBdata(colorMap_glowBow, {scale:2,doubles:20});
+    drawFromKeyColors(gp.glowBow, colorMap_glowBow.length/3);
+
+    addHeader("grayRed");
+    printRGBdata(colorMap_grayRed, {scale:2,doubles:20});
+    drawFromKeyColors(gp.grayRed, colorMap_grayRed.length/3);
+
+    addHeader("grayscale");
+    printRGBdata(colorMap_grayscale, {scale:2,doubles:20});
+    drawFromKeyColors(gp.grayscale, colorMap_grayscale.length/3);
+
+    addHeader("hottest");
+    printRGBdata(colorMap_hottest, {scale:2,doubles:20});
+    drawFromKeyColors(gp.hottest, colorMap_hottest.length/3);
+
+    addHeader("lava");
+    printRGBdata(colorMap_lava, {scale:2,doubles:20});
+    drawFromKeyColors(gp.lava, colorMap_lava.length/3);
+
+    addHeader("medical");
+    printRGBdata(colorMap_medical, {scale:2,doubles:20});
+    drawFromKeyColors(gp.medical, colorMap_medical.length/3);
+
+    addHeader("rainbow");
+    printRGBdata(colorMap_rainbow, {scale:2,doubles:20});
+    drawFromKeyColors(gp.rainbow, colorMap_rainbow.length/3);
+
+    addHeader("wheel1");
+    printRGBdata(colorMap_wheel1, {scale:2,doubles:20});
+    drawFromKeyColors(gp.wheel1, colorMap_wheel1.length/3);
+
+    addHeader("wheel2");
+    printRGBdata(colorMap_wheel2, {scale:2,doubles:20});
+    drawFromKeyColors(gp.wheel2, colorMap_wheel2.length/3);
+
+    addHeader("wheel3");
+    printRGBdata(colorMap_wheel3, {scale:2,doubles:20});
+    drawFromKeyColors(gp.wheel3, colorMap_wheel3.length/3);
+
+    addHeader("whiteHot");
+    printRGBdata(colorMap_whiteHot, {scale:2,doubles:20});
+    drawFromKeyColors(gp.whiteHot, colorMap_whiteHot.length/3);
+
+    addHeader("yellow");
+    printRGBdata(colorMap_yellow, {scale:2,doubles:20});
+    drawFromKeyColors(gp.yellow, colorMap_yellow.length/3);
+    
+}
+
+function printAll_ReferenceColorSchemes()
+{
+    var options = {scale:1,doubles:20};
+    for (var i = 0; i < color_schemes.length; i++) {
+        
+        addHeader(color_schemes[i].name + "&nbsp;&nbsp;&nbsp;&nbsp;width:" + color_schemes[i].map.length/3);
+        printRGBdata(color_schemes[i].map, options);
+    }
+}
 
 function testDifferentGradientGenerators()
 {
