@@ -16,7 +16,7 @@ function FROM_RGB(r,g,b)
 {
     return r*65536 + g*256 + b; 
 }
-var gp = {
+var gps = {
     IronBow:[
         {p:0, c:COLOR.BLACK},
         {p:10, c:COLOR.DARKBLUE},
