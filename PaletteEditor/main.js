@@ -179,6 +179,13 @@ var RainBow2 = [
     {p:100, c:COLOR.WHITE}
 ];
 
+function addHeader(text)
+{
+    var div = document.createElement("div");
+    div.innerHTML = text + "<br>";
+    document.body.appendChild(div);
+}
+
 function main() {
     
     drawIronBow();
@@ -188,14 +195,12 @@ function main() {
     drawFromKeyColors(RainBow, 240);
     
     //testDifferentGradientGenerators();
-    
-    printRGBdata(colorMap_arctic);
-    printRGBdata(colorMap_glowBow);
-    
-    
-    printRGBdata(colorMap_wheel1);
-
-    
+    for (var i = 0; i < color_schemes.length; i++) {
+        
+        addHeader(color_schemes[i].name);
+        printRGBdata(color_schemes[i].map);
+    }
+  
 
     //console.log(CRGB.FROM_VALUE(0xFF1112));
 }
