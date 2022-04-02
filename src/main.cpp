@@ -4,6 +4,8 @@
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 #include <SPI.h>
 #include "interpolation.h"
+#include "GradientPalettes.h"
+#include "HTMLColors.h"
 
 #define TFT_SCK       13
 #define TFT_MOSI      11
@@ -143,6 +145,7 @@ void setup() {
     
     mlx.setResolution(MLX90640_ADC_16BIT);
     mlx.setRefreshRate(MLX90640_16_HZ);
+
 
     printMLX_current_settings();
 }
