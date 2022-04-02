@@ -52,57 +52,47 @@ struct GradientPaletteDef {
     uint16_t itemCount;
 };
 
-uint16_t getIndex(uint16_t gpDefIndex)
-{
-    uint16_t index = 0;
-    for (int i=0;i<GP_Def_Count;i++)
-    {
-        if (i == gpDefIndex) return index;
-        index += GP_Def[i].itemCount;
-    }
-    return 0;
-}
-
 // this defines all the names and the sizes
 // to get a specific index where to find the first
 // data belonging to a specific GradientPalette
 // this array needs to get throught every item 
 // up to the one to find
 // to calculate the GP_Data index
-const uint16_t GP_Def_Count = 2;
+const uint16_t GP_Def_Count = 20;
 const struct GradientPaletteDef GP_Def[] = {
+    
     {"Iron Bow", 6},
     {"Rain Bow 0", 7},
     {"arctic",7},
     {"blackHot",2},
     {"blueRed",7},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-    {"",},
-
+    {"coldest",4},
+    {"contrast",9},
+    {"doubleRainbow",13},
+    {"glowBow",5},
+    {"grayRed",4},
+    {"grayscale",2},
+    {"hottest",4},
+    {"lava",8},
+    {"medical",20},
+    {"rainbow",7},
+    {"wheel1",6},
+    {"wheel2",7},
+    {"wheel3",12},
+    {"whiteHot",2},
+    {"yellow",4},
 };
 
 
-const struct GradientPaletteItem GP_Data[] = {
-    // IronBow
+const struct GradientPaletteItem GP_Data[] = { // current array size 136 items (with 8byte/item -> 1088 bytes for 20 palettes)
+    // IronBow // 6
         {0,     {0,0,0}}, // black
         {10.0f, {32,0,140}}, // dark blue
         {35.0f, {204,0,119}}, //magenta red
         {70.0f, {255,165,0}}, // orange
         {85.0f, {255,215,0}}, // gold
         {100.0f,{255,255,255}},  // white
-    // RainBow0
+    // RainBow0 // 7
         {0,     {0,0,0}},
         {100/6, {0,0,255}},
         {200/6, {0,255,255}},
@@ -111,7 +101,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {500/6, {255,0,0}},
         {100,   {255,255,255}},
 
-    // arctic[
+    // arctic[ // 7
         {0,   {15,16,146}},
         {11,  {15,34,239}},   // 66/6  = 11
         {29,  {54,227,232}}, // 168/6 = 28
@@ -121,12 +111,12 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {235,230,194}},
     //],
 
-    //blackHot:[
+    //blackHot:[ // 2
         {0,   {235,235,235}},
         {100, {16,16,16}},
     //],
 
-    //blueRed:[
+    //blueRed:[ // 7
         {0, {19,64,206}},
         {15, {32,141,232}},
         {34, {83,225,161}},
@@ -137,14 +127,14 @@ const struct GradientPaletteItem GP_Data[] = {
 
     //],
 
-    //coldest:[
+    //coldest:[ // 4
         {0, {15,15,239}}, // blue
         {13.5, {15,15,239}}, // blue
         {13.5, {45,45,45}}, // dark-grey
         {100, {255,255,255}}, // white
     //],
 
-    //contrast:[
+    //contrast:[ // 9
         {0, {16,16,16}}, // black-ish
         {99/8, {217,14,216}}, // magenta-ish
         {195/8, {15,15,149}}, // blue-ish
@@ -156,7 +146,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {255,255,255}}, // white
     //],
 
-    //doubleRainbow:[
+    //doubleRainbow:[ // 13
         {0, {18,15,18}}, // black-ish
         {75/12, {155,42,136}}, // magenta-ish
         {165/12, {59,103,238}}, // blue-ish
@@ -172,7 +162,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {235,232,235}}, // white
     //],
 
-    //glowBow:[
+    //glowBow:[ // 5
         {0, {16,16,16}},
         {25, {194,34,48}},
         {50, {236,105,13}},
@@ -180,26 +170,26 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {235,235,235}},
     //],
 
-    //grayRed:[
+    //grayRed:[ // 4
         {0, {218,186,175}}, // gray-ish
         {100/3, {61,130,123}}, // bluegreen-ish
         {170/3, {103,93,90}}, // gray-ish
         {100, {227,15,18}}, // red-ish
     //],
 
-    //grayscale:[
+    //grayscale:[ // 2
         {0, {0,0,0}},
         {100, {255,255,255}},
     //],
 
-    //hottest:[
+    //hottest:[ // 4
         {0, {16,16,16}}, // black-ish
         {87, {206,206,206}}, // white-ish
         {87, {190,14,13}}, // red
         {100, {190,14,13}}, // red
     //],
 
-    //lava:[
+    //lava:[ // 8
         {0, {17,19,22}},
         {70/8, {41,76,156}},
         {270/8, {14,137,131}},
@@ -210,7 +200,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {235,235,235}},
     //],
 
-    //medical:[
+    //medical:[ // 20
         {0, {36,36,198}},    // blue-ish
         {10, {36,36,198}},   // blue-ish
         {10, {70,71,238}},   // violet-ish
@@ -233,7 +223,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {236,196,37}}, // yellow-ish
     //],
 
-    //rainbow:[
+    //rainbow:[ // 7
         {0, {1,3,74}},
         {25, {3,129,212}},
         {38, {67,171,60}},
@@ -243,7 +233,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {255,233,208}},
     //],
 
-    //wheel1:[
+    //wheel1:[ // 6
         {0, {238,13,239}},
         {20, {14,236,13}},
         {40, {20,18,235}},
@@ -252,7 +242,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {240,14,16}},
     //],
 
-    //wheel2:[
+    //wheel2:[ // 7
         {0, {17,14,17}}, // black
         {10.5, {14,236,13}}, // green
         {21.4, {238,14,239}}, // magenta
@@ -262,7 +252,7 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {235,233,14}}, // yellow
     //],
 
-    //wheel3:[
+    //wheel3:[ // 12
         {0, {17,14,17}}, // black
         {100/11, {128,13,240}}, // violet
         {200/11, {15,235,12}}, // green
@@ -277,15 +267,27 @@ const struct GradientPaletteItem GP_Data[] = {
         {100, {235,233,14}}, // yellow
     //],
 
-    //whiteHot:[
+    //whiteHot:[ // 2
         {0, {16,16,16}},
         {100, {235,235,235}},
     //],
 
-    //yellow:[
+    //yellow:[ // 4
         {0, {62,16,15}},
         {20, {79,65,14}},
         {60, {185,125,14}},
         {100, {212,235,11}}
     //],
 };
+
+
+uint16_t getIndex(uint16_t gpDefIndex)
+{
+    uint16_t index = 0;
+    for (int i=0;i<GP_Def_Count;i++)
+    {
+        if (i == gpDefIndex) return index;
+        index += GP_Def[i].itemCount;
+    }
+    return 0;
+}

@@ -25,34 +25,6 @@ Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
 //#define PRINT_ASCIIART
 #define PRINT_TFT
 
-#define COLOR_WHITE    0xFFFFFF
-#define COLOR_GOLD     0xFFD700
-#define COLOR_ORANGE   0xFFA500
-#define COLOR_MAGENTA_RED 0xCC0077
-#define COLOR_DARKBLUE 0x20008C
-#define COLOR_BLACK    0x000000
-const uint32_t IronBowPaletteBaseColors[] = {
-    COLOR_WHITE, COLOR_GOLD, COLOR_ORANGE, COLOR_MAGENTA_RED, COLOR_DARKBLUE, COLOR_BLACK
-}; // above have root multipliers 3,3,7,5,2 => total 20
-// 240/20 = 12
-// this will contain one less item the the above as every item here just defines the steps until the next color
-const uint8_t IronBowPaletteBase_Steps[] = {
-    12*3,12*3,12*7,12*5,12*2
-}
-
-// interpolate base colors, pseudo code
-// want 240 color map
-// BASECOLORS_COUNT = 8
-// 240-BASECOLORS_COUNT = 232
-// 232/(BASECOLORS_COUNT-1) = ~33 steps between each
-// 33*(BASECOLORS_COUNT-1) = 231
-// 231+BASECOLORS_COUNT = 239 total colors returned
-// or better just define how many steps between the base colors
-// then above calculations would not be necessary
-// and would also make it possible to do specific color maps
-// with fewer base colors
-
-
 //the colors we will be using
 const uint16_t camColors[] = {0x480F,
 0x400F,0x400F,0x400F,0x4010,0x3810,0x3810,0x3810,0x3810,0x3010,0x3010,
