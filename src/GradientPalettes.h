@@ -61,26 +61,26 @@ struct GradientPaletteDef {
 const uint16_t GP_Def_Count = 20;
 const struct GradientPaletteDef GP_Def[] = {
     
-    {"Iron Bow", 6},
-    {"Rain Bow 0", 7},
-    {"arctic",7},
-    {"blackHot",2},
-    {"blueRed",7},
-    {"coldest",4},
-    {"contrast",9},
-    {"doubleRainbow",13},
-    {"glowBow",5},
-    {"grayRed",4},
-    {"grayscale",2},
-    {"hottest",4},
-    {"lava",8},
-    {"medical",20},
-    {"rainbow",7},
-    {"wheel1",6},
-    {"wheel2",7},
-    {"wheel3",12},
-    {"whiteHot",2},
-    {"yellow",4},
+    {"Iron Bow",6},        // 0
+    {"Rain Bow 0",7},      // 1
+    {"arctic",7},          // 2
+    {"black Hot",2},       // 3
+    {"blue Red",7},        // 4
+    {"coldest",4},         // 5
+    {"contrast",9},        // 6
+    {"double Rainbow",13}, // 7
+    {"glow Bow",5},        // 8
+    {"gray Red",4},        // 9
+    {"grayscale",2},       // 10
+    {"hottest",4},         // 11
+    {"lava",8},            // 12
+    {"medical",20},        // 13
+    {"rainbow",7},         // 14
+    {"wheel1",6},          // 15
+    {"wheel2",7},          // 16
+    {"wheel3",12},         // 17
+    {"white Hot",2},       // 18
+    {"yellow",4},          // 19
 };
 
 
@@ -281,7 +281,7 @@ const struct GradientPaletteItem GP_Data[] = { // current array size 136 items (
 };
 
 
-uint16_t getIndex(uint16_t gpDefIndex)
+uint16_t getDataIndex(uint16_t gpDefIndex)
 {
     uint16_t index = 0;
     for (int i=0;i<GP_Def_Count;i++)

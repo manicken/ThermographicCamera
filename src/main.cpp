@@ -7,6 +7,8 @@
 #include "GradientPalettes.h"
 #include "HTMLColors.h"
 
+#include <Button.h>
+
 #define TFT_SCK       13
 #define TFT_MOSI      11
 #define TFT_CS        10
@@ -25,34 +27,105 @@ Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
 //#define PRINT_ASCIIART
 #define PRINT_TFT
 
-//the colors we will be using
-const uint16_t camColors[] = {0x480F,
-0x400F,0x400F,0x400F,0x4010,0x3810,0x3810,0x3810,0x3810,0x3010,0x3010,
-0x3010,0x2810,0x2810,0x2810,0x2810,0x2010,0x2010,0x2010,0x1810,0x1810,
-0x1811,0x1811,0x1011,0x1011,0x1011,0x0811,0x0811,0x0811,0x0011,0x0011,
-0x0011,0x0011,0x0011,0x0031,0x0031,0x0051,0x0072,0x0072,0x0092,0x00B2,
-0x00B2,0x00D2,0x00F2,0x00F2,0x0112,0x0132,0x0152,0x0152,0x0172,0x0192,
-0x0192,0x01B2,0x01D2,0x01F3,0x01F3,0x0213,0x0233,0x0253,0x0253,0x0273,
-0x0293,0x02B3,0x02D3,0x02D3,0x02F3,0x0313,0x0333,0x0333,0x0353,0x0373,
-0x0394,0x03B4,0x03D4,0x03D4,0x03F4,0x0414,0x0434,0x0454,0x0474,0x0474,
-0x0494,0x04B4,0x04D4,0x04F4,0x0514,0x0534,0x0534,0x0554,0x0554,0x0574,
-0x0574,0x0573,0x0573,0x0573,0x0572,0x0572,0x0572,0x0571,0x0591,0x0591,
-0x0590,0x0590,0x058F,0x058F,0x058F,0x058E,0x05AE,0x05AE,0x05AD,0x05AD,
-0x05AD,0x05AC,0x05AC,0x05AB,0x05CB,0x05CB,0x05CA,0x05CA,0x05CA,0x05C9,
-0x05C9,0x05C8,0x05E8,0x05E8,0x05E7,0x05E7,0x05E6,0x05E6,0x05E6,0x05E5,
-0x05E5,0x0604,0x0604,0x0604,0x0603,0x0603,0x0602,0x0602,0x0601,0x0621,
-0x0621,0x0620,0x0620,0x0620,0x0620,0x0E20,0x0E20,0x0E40,0x1640,0x1640,
-0x1E40,0x1E40,0x2640,0x2640,0x2E40,0x2E60,0x3660,0x3660,0x3E60,0x3E60,
-0x3E60,0x4660,0x4660,0x4E60,0x4E80,0x5680,0x5680,0x5E80,0x5E80,0x6680,
-0x6680,0x6E80,0x6EA0,0x76A0,0x76A0,0x7EA0,0x7EA0,0x86A0,0x86A0,0x8EA0,
-0x8EC0,0x96C0,0x96C0,0x9EC0,0x9EC0,0xA6C0,0xAEC0,0xAEC0,0xB6E0,0xB6E0,
-0xBEE0,0xBEE0,0xC6E0,0xC6E0,0xCEE0,0xCEE0,0xD6E0,0xD700,0xDF00,0xDEE0,
-0xDEC0,0xDEA0,0xDE80,0xDE80,0xE660,0xE640,0xE620,0xE600,0xE5E0,0xE5C0,
-0xE5A0,0xE580,0xE560,0xE540,0xE520,0xE500,0xE4E0,0xE4C0,0xE4A0,0xE480,
-0xE460,0xEC40,0xEC20,0xEC00,0xEBE0,0xEBC0,0xEBA0,0xEB80,0xEB60,0xEB40,
-0xEB20,0xEB00,0xEAE0,0xEAC0,0xEAA0,0xEA80,0xEA60,0xEA40,0xF220,0xF200,
-0xF1E0,0xF1C0,0xF1A0,0xF180,0xF160,0xF140,0xF100,0xF0E0,0xF0C0,0xF0A0,
-0xF080,0xF060,0xF040,0xF020,0xF800,};
+/*
+ * note this don't take care of clipping
+ * or out of boundaries
+ * so special care must be taken when using it
+ */
+void drawRGBBitmap(int16_t x, int16_t y, CRGB *pcolors,
+                                    int16_t w, int16_t h)
+{
+    tft.startWrite();
+    tft.setAddrWindow(x, y, w, h);
+    for (int16_t r=0; r<h; r++) {
+        for (int16_t c=0; c<w; c++) {
+            int index = r*w + c;
+            tft.SPI_WRITE16(pcolors[index].toRGB565());
+        }
+    }
+    tft.endWrite();
+
+}
+
+void fill_gradient_RGB( CRGB* leds,
+                   uint16_t startpos, CRGB startcolor,
+                   uint16_t endpos,   CRGB endcolor )
+{
+    // if the points are in the wrong order, straighten them
+    if( endpos < startpos ) {
+        uint16_t t = endpos;
+        CRGB tc = endcolor;
+        endcolor = startcolor;
+        endpos = startpos;
+        startpos = t;
+        startcolor = tc;
+    }
+
+    int16_t rdistance87;
+    int16_t gdistance87;
+    int16_t bdistance87;
+
+    rdistance87 = (endcolor.r - startcolor.r) << 7;
+    gdistance87 = (endcolor.g - startcolor.g) << 7;
+    bdistance87 = (endcolor.b - startcolor.b) << 7;
+
+    uint16_t pixeldistance = endpos - startpos;
+    int16_t divisor = pixeldistance ? pixeldistance : 1;
+
+    int16_t rdelta87 = rdistance87 / divisor;
+    int16_t gdelta87 = gdistance87 / divisor;
+    int16_t bdelta87 = bdistance87 / divisor;
+
+    rdelta87 *= 2;
+    gdelta87 *= 2;
+    bdelta87 *= 2;
+
+    uint16_t r88 = startcolor.r << 8;
+    uint16_t g88 = startcolor.g << 8;
+    uint16_t b88 = startcolor.b << 8;
+    for( uint16_t i = startpos; i <= endpos; i++) {
+        leds[i] = CRGB( r88 >> 8, g88 >> 8, b88 >> 8);
+        r88 += rdelta87;
+        g88 += gdelta87;
+        b88 += bdelta87;
+    }
+}
+
+void generateGradientColorMap(CRGB* colorMap, uint16_t gradientCount, const GradientPaletteItem* gradients, uint16_t totalRange)
+{
+    for (int i = 0; i < (gradientCount-1); i++)
+    {
+        fill_gradient_RGB(
+            colorMap, 
+            (totalRange * gradients[i].procent) / 100,
+            gradients[i].color, 
+            (i != (gradientCount-2))?(totalRange * gradients[i+1].procent) / 100:(totalRange-1),
+            gradients[i+1].color
+        );
+    }
+}
+#define COLOR_PALETTE_COUNT 240
+
+CRGB camColors[COLOR_PALETTE_COUNT];
+
+void setGradientColorMap(int16_t index)
+{
+    if (index >= GP_Def_Count) index = GP_Def_Count-1;
+    if (index < 0) index = 0;
+    uint16_t dataIndex = getDataIndex(index);
+    generateGradientColorMap(camColors,  GP_Def[index].itemCount, &GP_Data[dataIndex], COLOR_PALETTE_COUNT);
+
+    // print the colormap name
+    tft.fillRect(120, 230, 120, 7, ST77XX_BLACK);
+    tft.setTextSize(1);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setCursor(120, 230);
+    tft.print(GP_Def[index].name);
+
+    // draw the temp-range colormap 
+    for (int i=0;i<10;i++)
+        drawRGBBitmap(0, 200+i, camColors, 240, 1);
+}
 
 void printMLX_current_settings()
 {
@@ -83,20 +156,44 @@ void printMLX_current_settings()
         case MLX90640_64_HZ: Serial.println("64 Hz"); break;
     }
 }
+#define ST77XX_ColorMode_444 0x03
+#define ST77XX_ColorMode_565 0x05
+#define ST77XX_ColorMode_666 0x06
+
+void setColorMode(uint8_t mode)
+{
+    tft.sendCommand(ST77XX_COLMOD, &mode, 1);
+}
+
+
+
+
+Button btnUp(5);
+Button btnDown(6);
+
+int16_t currentColorMapIndex = 0;
 
 void setup() {
+    btnUp.begin();
+    btnDown.begin();
     //while (!Serial) delay(10);
     Serial.begin(115200);
     delay(100);
 
+    
+
     tft.init(240, 240);   // initialize a ST7789 chip, 240x240 pixels
+
+    //setColorMode(ST77XX_ColorMode_565);
+
     tft.setTextWrap(false); // Allow text to run off right edge
     tft.fillScreen(ST77XX_BLACK);
     tft.enableDisplay(true);
     tft.setRotation(2);
+
+    setGradientColorMap(currentColorMapIndex);
   
-    for (int i=0;i<10;i++)
-        tft.drawRGBBitmap(0, 200+i, &camColors[5], 240, 1);
+    
 
     Serial.println("Adafruit MLX90640 Simple Test");
     Wire.setClock(1000000);
@@ -115,7 +212,7 @@ void setup() {
     //mlx.setMode(MLX90640_INTERLEAVED);
     mlx.setMode(MLX90640_CHESS);
     
-    mlx.setResolution(MLX90640_ADC_16BIT);
+    mlx.setResolution(MLX90640_ADC_19BIT);
     mlx.setRefreshRate(MLX90640_16_HZ);
 
 
@@ -152,9 +249,9 @@ void convertToImage(float *src, uint16_t *dest, uint8_t rows, uint8_t cols)
         for (uint8_t c=0; c<cols; c++) {
             int index = r*cols + c;
             float t = src[index];
-            uint8_t colorIndex = map(t, minTemp, maxTemp, 0, 255);
-            colorIndex = constrain(colorIndex, 0, 255);
-            dest[index] = camColors[colorIndex];
+            uint8_t colorIndex = map(t, minTemp, maxTemp, 0, COLOR_PALETTE_COUNT-1);
+            colorIndex = constrain(colorIndex, 0, COLOR_PALETTE_COUNT-1);
+            dest[index] = camColors[colorIndex].toRGB565();
         }
     }
 }
@@ -167,8 +264,8 @@ void tft_draw_Interpolated(float *src, int16_t rows, int16_t cols)
         for (int16_t c=cols-1; c>=0; c--) { // draw cols in reverse order because data from MLX is reversed
             int index = r*cols + c;
             float t = src[index];
-            uint8_t colorIndex = constrain(map(t, minTemp, maxTemp, 0, 255), 0, 255);
-            uint16_t color = camColors[colorIndex];
+            uint8_t colorIndex = constrain(map(t, minTemp, maxTemp, 0, COLOR_PALETTE_COUNT-1), 0, COLOR_PALETTE_COUNT-1);
+            uint16_t color = camColors[colorIndex].toRGB565();
 
             tft.SPI_WRITE16(color);
         }
@@ -201,9 +298,9 @@ void tft_printNonInterpolated()
     for (uint8_t h=0; h<24; h++) {
         for (uint8_t w=0; w<32; w++) {
             float t = frame[h*32 + w];
-            uint8_t colorIndex = map(t, minTemp, maxTemp, 0, 255);
-            colorIndex = constrain(colorIndex, 0, 255);
-            tft.fillRect((32-w)*7, h*7, 7, 7, camColors[colorIndex]);
+            uint8_t colorIndex = map(t, minTemp, maxTemp, 0, COLOR_PALETTE_COUNT-1);
+            colorIndex = constrain(colorIndex, 0, COLOR_PALETTE_COUNT-1);
+            tft.fillRect((32-w)*7, h*7, 7, 7, camColors[colorIndex].toRGB565());
         }
     }
 }
@@ -245,20 +342,32 @@ void serial_printAsASCIIART()
 void tft_printMaxMin()
 {
     // clear prev text
-    tft.fillRect(0, 180, 84, 14, ST77XX_BLACK);
-    tft.fillRect(180, 180, 60, 14, ST77XX_BLACK);
+    tft.fillRect(0, 180, 240, 14, ST77XX_BLACK);
+    //tft.fillRect(180, 180, 60, 14, ST77XX_BLACK);
 
     // print new text
     tft.setTextSize(2);
     tft.setTextColor(ST77XX_WHITE);
     tft.setCursor(0, 180);
     tft.print(minTemp);
+    tft.setCursor(90, 180);
+    tft.print((maxTemp-minTemp)/2+minTemp);
     tft.setCursor(180, 180);
     tft.print(maxTemp);
 }
 int read_status = 0;
 uint32_t fps = 0;
 void loop() {
+    if (btnDown.pressed() && currentColorMapIndex != (GP_Def_Count-1)){
+        currentColorMapIndex++;
+        //if (currentColorMapIndex == GP_Def_Count) currentColorMapIndex = (GP_Def_Count-1);
+        setGradientColorMap(currentColorMapIndex);
+    }
+    if (btnUp.pressed() && currentColorMapIndex != 0){
+        currentColorMapIndex--;
+        //if (currentColorMapIndex == 0) currentColorMapIndex = (GP_Def_Count-1);
+        setGradientColorMap(currentColorMapIndex);
+    }
     //delay(100);
     fps = millis();
     //t = millis();
@@ -288,7 +397,7 @@ void loop() {
 
     fps = (1000/(millis()-fps));
     tft.setTextSize(1);
-    tft.fillRect(0, 230, 60, 14, ST77XX_BLACK);
+    tft.fillRect(0, 230, 60, 7, ST77XX_BLACK);
     tft.setCursor(0, 230);
     tft.printf("fps:%d", fps);
 }

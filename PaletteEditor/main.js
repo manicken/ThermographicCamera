@@ -1,29 +1,4 @@
-class CRGB
-{
-	constructor(red,green,blue)
-    {
-    	this.r = parseInt(red);
-        this.g = parseInt(green);
-        this.b = parseInt(blue);
-    }
-    /*constructor (crgb)
-    {
-    	this.r = crgb.r;
-        this.g = crgb.g;
-        this.b = crgb.b;
-    }*/
 
-    static FROM_VALUE(value)
-    {
-        return new CRGB((value >> 16) & 0xFF,
-                        (value >> 8) & 0xFF,
-                        value & 0xFF)
-    }
-    asArray()
-    {
-        return [this.r,this.g,this.b];
-    }
-}
 
 
 
@@ -114,32 +89,23 @@ function convertToFlatRGB(colors)
     }
     return out;
 }
-
-
-function drawFromKeyColors(gradients, totalRange) {
-    var keyColors = [];//gradients.keyColors;
-    var keyProcents = [];//gradients.keyProcents;
-    var keyRanges = new Int32Array(gradients.length);
-    //var currRange = 0;
-    for (var i = 0; i < gradients.length; i++)
+function generateGradientColorMap(colorMap, gradients, totalRange)
+{
+    for (var i = 0; i < (gradients.length-1); i++)
     {
-        //currRange += parseInt((totalRange * keyProcents[i]) / 100);
-        keyRanges[i] = parseInt((totalRange * gradients[i].p) / 100);
-        keyColors[i] = CRGB.FROM_VALUE(gradients[i].c);
+        fill_gradient_RGB(
+            colorMap, 
+            parseInt((totalRange * gradients[i].p) / 100),
+            gradients[i].c, 
+            (i != (gradients.length-2))?parseInt((totalRange * gradients[i+1].p) / 100):(totalRange-1),
+            gradients[i+1].c
+        );
     }
-    // make sure that the last range item allways is equal to totalRange-1
-    keyRanges[gradients.length-1] = (totalRange-1);
-    
-    //console.log("keyProcents:", keyProcents);
-    //console.log("keyRanges:", keyRanges);
-    //console.log("keyColors:",keyColors);
+}
 
+function drawGradientColors(gradients, totalRange) {
     var colorMap = [];
-    for (var i = 0; i < (keyColors.length-1); i++)
-    {
-       fill_gradient_RGB(colorMap, keyRanges[i], keyColors[i], keyRanges[i+1], keyColors[i+1]);
-    }
-    //console.log(colorMap);
+    generateGradientColorMap(colorMap, gradients, totalRange);
     var rgbData = convertToFlatRGB(colorMap);
     printRGBdata(rgbData, {scale:2,doubles:20});
 }
@@ -171,7 +137,7 @@ function printAllGradientPalettes()
     {
         var gp = gps[names[i]];
         addHeader(names[i]);
-        drawFromKeyColors(gp, 480);
+        drawGradientColors(gp, 480);
     }
 }
 
@@ -180,83 +146,83 @@ function printAll_ToCompare()
     var width = 240;
     addHeader("IronBox (own)");
     drawIronBow();
-    drawFromKeyColors(gps.IronBow, width);
+    drawGradientColors(gps.IronBow, width);
 
     addHeader("RainBow (own)");
     drawRainBow();
-    drawFromKeyColors(gps.RainBow, width);
+    drawGradientColors(gps.RainBow, width);
     
     addHeader("arctic");
     printRGBdata(colorMap_arctic, {scale:2,doubles:20});
-    drawFromKeyColors(gps.arctic, colorMap_arctic.length/3);
+    drawGradientColors(gps.arctic, colorMap_arctic.length/3);
 
     addHeader("blackHot");
     printRGBdata(colorMap_blackHot, {scale:2,doubles:20});
-    drawFromKeyColors(gps.blackHot, colorMap_blackHot.length/3);
+    drawGradientColors(gps.blackHot, colorMap_blackHot.length/3);
 
     addHeader("blueRed");
     printRGBdata(colorMap_blueRed, {scale:2,doubles:20});
-    drawFromKeyColors(gps.blueRed, colorMap_blueRed.length/3);
+    drawGradientColors(gps.blueRed, colorMap_blueRed.length/3);
 
     addHeader("coldest");
     printRGBdata(colorMap_coldest, {scale:2,doubles:20});
-    drawFromKeyColors(gps.coldest, colorMap_coldest.length/3);
+    drawGradientColors(gps.coldest, colorMap_coldest.length/3);
 
     addHeader("contrast");
     printRGBdata(colorMap_contrast, {scale:2,doubles:20});
-    drawFromKeyColors(gps.contrast, colorMap_contrast.length/3);
+    drawGradientColors(gps.contrast, colorMap_contrast.length/3);
 
     addHeader("doubleRainbow");
     printRGBdata(colorMap_doubleRainbow, {scale:2,doubles:20});
-    drawFromKeyColors(gps.doubleRainbow, colorMap_doubleRainbow.length/3);
+    drawGradientColors(gps.doubleRainbow, colorMap_doubleRainbow.length/3);
 
     addHeader("glowBow");
     printRGBdata(colorMap_glowBow, {scale:2,doubles:20});
-    drawFromKeyColors(gps.glowBow, colorMap_glowBow.length/3);
+    drawGradientColors(gps.glowBow, colorMap_glowBow.length/3);
 
     addHeader("grayRed");
     printRGBdata(colorMap_grayRed, {scale:2,doubles:20});
-    drawFromKeyColors(gps.grayRed, colorMap_grayRed.length/3);
+    drawGradientColors(gps.grayRed, colorMap_grayRed.length/3);
 
     addHeader("grayscale");
     printRGBdata(colorMap_grayscale, {scale:2,doubles:20});
-    drawFromKeyColors(gps.grayscale, colorMap_grayscale.length/3);
+    drawGradientColors(gps.grayscale, colorMap_grayscale.length/3);
 
     addHeader("hottest");
     printRGBdata(colorMap_hottest, {scale:2,doubles:20});
-    drawFromKeyColors(gps.hottest, colorMap_hottest.length/3);
+    drawGradientColors(gps.hottest, colorMap_hottest.length/3);
 
     addHeader("lava");
     printRGBdata(colorMap_lava, {scale:2,doubles:20});
-    drawFromKeyColors(gps.lava, colorMap_lava.length/3);
+    drawGradientColors(gps.lava, colorMap_lava.length/3);
 
     addHeader("medical");
     printRGBdata(colorMap_medical, {scale:2,doubles:20});
-    drawFromKeyColors(gps.medical, colorMap_medical.length/3);
+    drawGradientColors(gps.medical, colorMap_medical.length/3);
 
     addHeader("rainbow");
     printRGBdata(colorMap_rainbow, {scale:2,doubles:20});
-    drawFromKeyColors(gps.rainbow, colorMap_rainbow.length/3);
+    drawGradientColors(gps.rainbow, colorMap_rainbow.length/3);
 
     addHeader("wheel1");
     printRGBdata(colorMap_wheel1, {scale:2,doubles:20});
-    drawFromKeyColors(gps.wheel1, colorMap_wheel1.length/3);
+    drawGradientColors(gps.wheel1, colorMap_wheel1.length/3);
 
     addHeader("wheel2");
     printRGBdata(colorMap_wheel2, {scale:2,doubles:20});
-    drawFromKeyColors(gps.wheel2, colorMap_wheel2.length/3);
+    drawGradientColors(gps.wheel2, colorMap_wheel2.length/3);
 
     addHeader("wheel3");
     printRGBdata(colorMap_wheel3, {scale:2,doubles:20});
-    drawFromKeyColors(gps.wheel3, colorMap_wheel3.length/3);
+    drawGradientColors(gps.wheel3, colorMap_wheel3.length/3);
 
     addHeader("whiteHot");
     printRGBdata(colorMap_whiteHot, {scale:2,doubles:20});
-    drawFromKeyColors(gps.whiteHot, colorMap_whiteHot.length/3);
+    drawGradientColors(gps.whiteHot, colorMap_whiteHot.length/3);
 
     addHeader("yellow");
     printRGBdata(colorMap_yellow, {scale:2,doubles:20});
-    drawFromKeyColors(gps.yellow, colorMap_yellow.length/3);
+    drawGradientColors(gps.yellow, colorMap_yellow.length/3);
     
 }
 
