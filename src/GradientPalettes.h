@@ -1,56 +1,9 @@
+#ifndef GRADIENT_PALETTES_H
+#define GRADIENT_PALETTES_H
+
 //#include "HTMLColors.h"
 #include <Arduino.h>
-
-struct CRGB {
-    union {
-		struct {
-            union {
-                uint8_t padding;
-            };
-            union {
-                uint8_t r;
-                uint8_t red;
-            };
-            union {
-                uint8_t g;
-                uint8_t green;
-            };
-            union {
-                uint8_t b;
-                uint8_t blue;
-            };
-        };
-		uint32_t raw;
-	};
-
-    inline uint16_t toRGB565() const {
-        return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
-    }
-
-    // default values are UNINITIALIZED
-    inline CRGB() __attribute__((always_inline)) = default;
-    /// allow construction from R, G, B
-    inline CRGB( uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
-        : r(ir), g(ig), b(ib)
-    {
-    }
-
-    /// allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
-    inline CRGB( uint32_t colorcode)  __attribute__((always_inline))
-    : raw(colorcode)//r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
-    {
-    }
-};
-
-struct GradientPaletteItem {
-    float procent;
-    const struct CRGB color;
-};
-
-struct GradientPaletteDef {
-    char *name;
-    uint16_t itemCount;
-};
+#include "GradientPalette_Structs.h"
 
 // this defines all the names and the sizes
 // to get a specific index where to find the first
@@ -80,7 +33,7 @@ const struct GradientPaletteDef GP_Def[] = {
     {"wheel2",7},          // 16
     {"wheel3",12},         // 17
     {"white Hot",2},       // 18
-    {"yellow",4},          // 19
+    {"yellow",4}          // 19
 };
 
 
@@ -280,14 +233,4 @@ const struct GradientPaletteItem GP_Data[] = { // current array size 136 items (
     //],
 };
 
-
-uint16_t getDataIndex(uint16_t gpDefIndex)
-{
-    uint16_t index = 0;
-    for (int i=0;i<GP_Def_Count;i++)
-    {
-        if (i == gpDefIndex) return index;
-        index += GP_Def[i].itemCount;
-    }
-    return 0;
-}
+#endif

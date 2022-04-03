@@ -5,6 +5,8 @@
 #include <SPI.h>
 #include "interpolation.h"
 #include "GradientPalettes.h"
+#include "GradientPalette_Structs.h"
+#include "GradientPalette_Helpers.h"
 #include "HTMLColors.h"
 
 #include <Button.h>
