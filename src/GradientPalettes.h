@@ -5,13 +5,14 @@
 #include <Arduino.h>
 #include "GradientPalette_Structs.h"
 
+
+const uint16_t GP_Def_Count = 20;
 // this defines all the names and the sizes
 // to get a specific index where to find the first
 // data belonging to a specific GradientPalette
 // this array needs to get throught every item 
 // up to the one to find
 // to calculate the GP_Data index
-const uint16_t GP_Def_Count = 20;
 const struct GradientPaletteDef GP_Def[] = {
     
     {"Iron Bow",6},        // 0

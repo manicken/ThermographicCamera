@@ -24,6 +24,7 @@ struct CRGB {
             };
         };
 		uint32_t raw;
+        uint8_t arr[4];
 	};
 
     inline uint16_t toRGB565() const {
