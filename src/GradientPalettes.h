@@ -6,7 +6,7 @@
 #include "GradientPalette_Structs.h"
 
 
-const uint16_t GP_Def_Count = 20;
+const uint32_t GP_Def_Count = 20;
 // this defines all the names and the sizes
 // to get a specific index where to find the first
 // data belonging to a specific GradientPalette

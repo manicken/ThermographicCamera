@@ -30,13 +30,13 @@ void getMinMaxTemps()
 
 void printMLX_current_settings()
 {
-    Serial.print("Current mode: ");
+    Serial.print("log Current mode: ");
     if (mlx.getMode() == MLX90640_CHESS) {
-        Serial.println("Chess");
+        Serial.println("log Chess");
     } else {
-        Serial.println("Interleave");    
+        Serial.println("log Interleave");    
     }
-    Serial.print("Current resolution: ");
+    Serial.print("log Current resolution: ");
     mlx90640_resolution_t res = mlx.getResolution();
     switch (res) {
         case MLX90640_ADC_16BIT: Serial.println("16 bit"); break;
@@ -44,7 +44,7 @@ void printMLX_current_settings()
         case MLX90640_ADC_18BIT: Serial.println("18 bit"); break;
         case MLX90640_ADC_19BIT: Serial.println("19 bit"); break;
     }
-    Serial.print("Current frame rate: ");
+    Serial.print("log Current frame rate: ");
     mlx90640_refreshrate_t rate = mlx.getRefreshRate();
     switch (rate) {
         case MLX90640_0_5_HZ: Serial.println("0.5 Hz"); break;
@@ -60,16 +60,16 @@ void printMLX_current_settings()
 
 void ThermalCamera_Init()
 {
-    Serial.println("Adafruit MLX90640 Simple Test");
+    Serial.println("log Adafruit MLX90640 Simple Test");
     Wire.setClock(1000000);
     if (! mlx.begin(MLX90640_I2CADDR_DEFAULT, &Wire)) {
-        Serial.println("MLX90640 not found!");
+        Serial.println("log MLX90640 not found!");
         while (1) delay(10);
     }
     Wire.setClock(1000000);
-    Serial.println("Found Adafruit MLX90640");
+    Serial.println("log Found Adafruit MLX90640");
 
-    Serial.print("Serial number: ");
+    Serial.print("log Serial number: ");
     Serial.print(mlx.serialNumber[0], HEX);
     Serial.print(mlx.serialNumber[1], HEX);
     Serial.println(mlx.serialNumber[2], HEX);

@@ -130,7 +130,7 @@ void Display_printStatusMsg(int read_status)
     tft.fillRect(0, 220, 240, 14, ST77XX_BLACK);
     if (read_status != 0)
     {
-        Serial.printf("Failed:%d", read_status);
+        Serial.printf("log Failed:%d", read_status);
         tft.fillRect(0, 220, 240, 14, ST77XX_BLACK);
         tft.setTextSize(2);
         tft.setTextColor(ST77XX_RED);
