@@ -82,11 +82,11 @@ void setup() {
     //while (!Serial) delay(10);
     Serial.begin(115200);
     delay(100);
-
-    SerialRemoteControl::SetCB_cmd_setGradientColorMap("setGradientColorMap", setGradientColorMap, GP_Def_Count);
-    SerialRemoteControl::SetCB_cmd_setInterpolatedSize("setInterpolatedSize", setInterpolatedSize, 32, 320, 24, 240);
-    SerialRemoteControl::SetCB_cmd_setOutTarget("setOutTarget", setOutTarget, OUTPUT_TARGET::UNKNOWN_FIRST, OUTPUT_TARGET::UNKNOWN_LAST);
-
+    SerialRemoteControl::Init();
+    SerialRemoteControl::cmd_setGradientColorMap::SetCB("setGradientColorMap", setGradientColorMap, GP_Def_Count);
+    SerialRemoteControl::cmd_setInterpolatedSize::SetCB("setInterpolatedSize", setInterpolatedSize, 32, 320, 24, 240);
+    SerialRemoteControl::cmd_setOutTarget::SetCB("setOutTarget", setOutTarget, OUTPUT_TARGET::UNKNOWN_FIRST, OUTPUT_TARGET::UNKNOWN_LAST);
+    
     setGradientColorMap(currentColorMapIndex);
 
     ThermalCamera_Init();
