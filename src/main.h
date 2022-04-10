@@ -17,6 +17,7 @@ namespace Main
     }OUTPUT_TARGET;
 
     OUTPUT_TARGET outTarget = OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE; 
+    void(*outTargetCb)(void);
 
     #define COLOR_PALETTE_COUNT 240
 

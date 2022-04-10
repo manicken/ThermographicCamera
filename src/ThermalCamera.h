@@ -7,15 +7,39 @@
 
 namespace ThermalCamera
 {
+    #define AVERAGE_FRAME_READS 4
+    #define TC_PIXELCOUNT 32*24
     Adafruit_MLX90640 mlx;
-    float frame[32*24]; // buffer for full frame of temperatures
+    float frame[TC_PIXELCOUNT]; // buffer for full frame of temperatures
+    float frames[AVERAGE_FRAME_READS][TC_PIXELCOUNT];
+    int frameIndex = 0;
 
-    float minTemp = 0.0f;
-    float maxTemp = 0.0f;
+    float minTemp = 15.0f;
+    float maxTemp = 20.0f;
+
+    void average()
+    {
+        for (int di=0;di<TC_PIXELCOUNT;di++)
+        {
+            float avg = 0;
+            for (int i=0;i<AVERAGE_FRAME_READS;i++)
+            {
+                avg += frames[i][di];
+            }
+            frame[di] = avg / AVERAGE_FRAME_READS;
+        }
+    }
 
     int getFrame()
     {
-        return mlx.getFrame(frame);
+        int res = 0;
+        for (int i=0;i<AVERAGE_FRAME_READS;i++)
+        {
+            res = mlx.getFrame(frames[i]);
+            if (res != 0) return res;
+        }
+        average();
+        return 0;
     }
 
     void getMinMaxTemps()
@@ -83,7 +107,7 @@ namespace ThermalCamera
         mlx.setMode(MLX90640_CHESS);
         
         mlx.setResolution(MLX90640_ADC_19BIT);
-        mlx.setRefreshRate(MLX90640_16_HZ);
+        mlx.setRefreshRate(MLX90640_32_HZ);
 
         printMLX_current_settings();
     }

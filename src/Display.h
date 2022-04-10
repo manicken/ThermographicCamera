@@ -113,7 +113,7 @@ namespace Display
     void printCurrentGradientColorPalette()
     {
         // print the colormap name
-        tft.fillRect(120, 230, 120, 7, ST77XX_BLACK);
+        tft.fillRect(120, 230, 100, 7, ST77XX_BLACK);
         tft.setTextSize(1);
         tft.setTextColor(ST77XX_WHITE);
         tft.setCursor(120, 230);
@@ -134,7 +134,7 @@ namespace Display
 
     void printStatusMsg(int read_status)
     {
-        tft.fillRect(0, 220, 240, 14, ST77XX_BLACK);
+        //tft.fillRect(0, 220, 240, 14, ST77XX_BLACK);
         if (read_status != 0)
         {
             Serial.printf("log Failed:%d", read_status);

@@ -47,6 +47,22 @@ void setInterpolatedSize(int width, int height)
 void setOutTarget(int target_id)
 {
     Main::outTarget = (Main::OUTPUT_TARGET)target_id;
+
+    if (Main::outTarget == Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE) 
+        Main::outTargetCb = &Display::print_BiqubicInterpolated;
+    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_VIDEO_STREAM)
+        Main::outTargetCb = &USBSerialStream::print_BiqubicInterpolated;
+    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_TEMP_VALUES_ASCII)
+        Main::outTargetCb = &USBSerialStream::printTempValues;
+    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_ASCII_ART)
+        Main::outTargetCb = &USBSerialStream::printAsASCIIART;
+    else if (Main::outTarget == Main::OUTPUT_TARGET::TFT_RAW_PIXELS)
+        Main::outTargetCb = &Display::printNonInterpolated;
+    else 
+    {
+
+    }
+
     print_CurrentGradientColorPalette();
 }
 
@@ -61,10 +77,11 @@ void setup() {
     Serial.begin(115200);
     delay(100);
     SerialRemoteControl::Init();
-    SerialRemoteControl::cmd_setGradientColorMap::SetCB("setGradientColorMap", setGradientColorMap, GradientPalettes::Count);
-    SerialRemoteControl::cmd_setInterpolatedSize::SetCB("setInterpolatedSize", setInterpolatedSize, 32, 320, 24, 240);
-    SerialRemoteControl::cmd_setOutTarget::SetCB("setOutTarget", setOutTarget, Main::OUTPUT_TARGET::UNKNOWN_FIRST, Main::OUTPUT_TARGET::UNKNOWN_LAST);
+    SerialRemoteControl::cmd_setGradientColorMap::SetCB("setGradientColorMap", &setGradientColorMap, GradientPalettes::Count);
+    SerialRemoteControl::cmd_setInterpolatedSize::SetCB("setInterpolatedSize", &setInterpolatedSize, 32, 320, 24, 240);
+    SerialRemoteControl::cmd_setOutTarget::SetCB("setOutTarget", &setOutTarget, Main::OUTPUT_TARGET::UNKNOWN_FIRST, Main::OUTPUT_TARGET::UNKNOWN_LAST);
     
+    setOutTarget(Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE);
     setGradientColorMap(Main::currentColorMapIndex);
 
     ThermalCamera::Init();
@@ -98,20 +115,7 @@ void loop() {
     ThermalCamera::getMinMaxTemps();
     
     //t = millis();
-    if (Main::outTarget == Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE) 
-        Display::print_BiqubicInterpolated();
-    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_VIDEO_STREAM)
-        USBSerialStream::print_BiqubicInterpolated();
-    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_TEMP_VALUES_ASCII)
-        USBSerialStream::printTempValues();
-    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_ASCII_ART)
-        USBSerialStream::printAsASCIIART();
-    else if (Main::outTarget == Main::OUTPUT_TARGET::TFT_RAW_PIXELS)
-        Display::printNonInterpolated();
-    else 
-    {
-
-    }
+    Main::outTargetCb();
 
     //Serial.print("Redraw took "); Serial.print(millis()-t); Serial.println(" ms");
     Display::printFps((1000/(millis()-fps)));
