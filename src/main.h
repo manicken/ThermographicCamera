@@ -19,7 +19,7 @@ namespace Main
     OUTPUT_TARGET outTarget = OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE; 
     void(*outTargetCb)(void);
 
-    #define COLOR_PALETTE_COUNT 240
+    #define COLOR_PALETTE_COUNT 288
 
 
     CRGB camColors[COLOR_PALETTE_COUNT];

@@ -1874,7 +1874,7 @@ void Adafruit_SPITFT::invertDisplay(bool i) {
     @param   blue   8-bit blue brightnesss (0 = off, 255 = max).
     @return  'Packed' 16-bit color value (565 format).
 */
-uint16_t Adafruit_SPITFT::color565(uint8_t red, uint8_t green, uint8_t blue) {
+inline uint16_t Adafruit_SPITFT::color565(uint8_t red, uint8_t green, uint8_t blue) {
   return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
 }
 
