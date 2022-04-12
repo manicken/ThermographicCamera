@@ -14,6 +14,12 @@
 #include "SerialRemoteControl.h"
 
 uint32_t t = 0;// used for easy timing stuff
+int read_status = 0;
+uint32_t fps = 0;
+
+void fastLoop(); // forward declaration
+Button btnUp(5);
+Button btnDown(6);
 
 void print_CurrentGradientColorPalette()
 {
@@ -66,9 +72,6 @@ void setOutTarget(int target_id)
     print_CurrentGradientColorPalette();
 }
 
-Button btnUp(5);
-Button btnDown(6);
-
 void setup() {
     Display::Init();
     btnUp.begin();
@@ -85,38 +88,45 @@ void setup() {
     setGradientColorMap(Main::currentColorMapIndex);
 
     ThermalCamera::Init();
+
+    //loop = loop2;
+    fastLoop();
 }
 
-int read_status = 0;
-uint32_t fps = 0;
-void loop() {
-    SerialRemoteControl::ReadSerial();
+void fastLoop() {
+    while(1) {
+        SerialRemoteControl::ReadSerial();
 
-    if (btnDown.pressed() && Main::currentColorMapIndex != (GradientPalettes::Count-1)){
-        Main::currentColorMapIndex++;
-        //if (currentColorMapIndex == GradientPalettes::Count) currentColorMapIndex = (GradientPalettes::Count-1);
-        setGradientColorMap(Main::currentColorMapIndex);
-    }
-    if (btnUp.pressed() && Main::currentColorMapIndex != 0){
-        Main::currentColorMapIndex--;
-        //if (currentColorMapIndex == 0) currentColorMapIndex = (GradientPalettes::Count-1);
-        setGradientColorMap(Main::currentColorMapIndex);
-    }
-    //delay(100);
-    fps = millis();
-    //t = millis();
-    
-    read_status = ThermalCamera::getFrame();
-    Display::printStatusMsg(read_status);
-    if (read_status != 0)
-        return;
-    //Serial.printf("mlx.getFrame time:%d\n",(millis()-t));
-    
-    ThermalCamera::getMinMaxTemps();
-    
-    //t = millis();
-    Main::outTargetCb();
+        if (btnDown.pressed() && Main::currentColorMapIndex != (GradientPalettes::Count-1)){
+            Main::currentColorMapIndex++;
+            //if (currentColorMapIndex == GradientPalettes::Count) currentColorMapIndex = (GradientPalettes::Count-1);
+            setGradientColorMap(Main::currentColorMapIndex);
+        }
+        if (btnUp.pressed() && Main::currentColorMapIndex != 0){
+            Main::currentColorMapIndex--;
+            //if (currentColorMapIndex == 0) currentColorMapIndex = (GradientPalettes::Count-1);
+            setGradientColorMap(Main::currentColorMapIndex);
+        }
+        //delay(100);
+        fps = millis();
+        //t = millis();
+        
+        read_status = ThermalCamera::getFrame();
+        Display::printStatusMsg(read_status);
+        if (read_status != 0)
+            return;
+        //Serial.printf("mlx.getFrame time:%d\n",(millis()-t));
+        
+        ThermalCamera::getMinMaxTemps();
+        
+        //t = millis();
+        Main::outTargetCb();
 
-    //Serial.print("Redraw took "); Serial.print(millis()-t); Serial.println(" ms");
-    Display::printFps((1000/(millis()-fps)));
+        //Serial.print("Redraw took "); Serial.print(millis()-t); Serial.println(" ms");
+        Display::printFps(1000.0f/(float)(millis()-fps));
+
+        yield();
+    }
 }
+
+void loop() {} // this will never be called

@@ -118,9 +118,9 @@ namespace Display
         tft.setTextColor(COLOR_WHITE);
         tft.setCursor(0, MAX_MID_MIN_TEXTS_Y_POS);
         tft.print(ThermalCamera::minTemp);
-        tft.setCursor(COLOR_PALETTE_COUNT/2-2.5*5*MAX_MID_MIN_TEXTS_SIZE, MAX_MID_MIN_TEXTS_Y_POS);
+        tft.setCursor(COLOR_PALETTE_COUNT/2-2.5*6*MAX_MID_MIN_TEXTS_SIZE, MAX_MID_MIN_TEXTS_Y_POS);
         tft.print((ThermalCamera::maxTemp-ThermalCamera::minTemp)/2+ThermalCamera::minTemp);
-        tft.setCursor(COLOR_PALETTE_COUNT-6*5*MAX_MID_MIN_TEXTS_SIZE, MAX_MID_MIN_TEXTS_Y_POS);
+        tft.setCursor(COLOR_PALETTE_COUNT-5*6*MAX_MID_MIN_TEXTS_SIZE, MAX_MID_MIN_TEXTS_Y_POS);
         tft.print(ThermalCamera::maxTemp);
     }
 
@@ -168,12 +168,13 @@ namespace Display
             drawRGBBitmap(0, COLOR_PALETTE_Y_POS+i, Main::camColors, COLOR_PALETTE_COUNT, 1);
     }
 
-    void printFps(uint32_t fps)
+    void printFps(float fps)
     {
         tft.setTextSize(1);
-        tft.fillRect(0, 230, 60, 7, COLOR_BLACK);
+        tft.fillRect(0, 230, 8*6, 7, COLOR_BLACK);
         tft.setCursor(0, 230);
-        tft.printf("fps:%d", fps);
+        tft.print("fps:");
+        tft.print(fps);
     }
 
     void printStatusMsg(int read_status)
@@ -194,12 +195,13 @@ namespace Display
     void print_BiqubicInterpolated()
     {
         static float gblurTemp[32*2*24*2];
+        //static float gblurTemp2[32*2*2*24*2*2];
         printMaxMin();
         //t = millis();
-        gblur.calculate(ThermalCamera::frame, gblurTemp);
+        gblur.calculate(ThermalCamera::frame, gblurTemp, 32, 24);
         interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         //INTERPOLATED_COLS = 32*2;
-        //INTERPOLATED_ROWS = 24*2*2;
+        //INTERPOLATED_ROWS = 24*2;
 
         //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         

@@ -112,7 +112,7 @@ namespace ThermalCamera
         //mlx.setMode(MLX90640_INTERLEAVED);
         mlx.setMode(MLX90640_CHESS);
         
-        mlx.setResolution(MLX90640_ADC_19BIT);
+        mlx.setResolution(MLX90640_ADC_16BIT);
         mlx.setRefreshRate(MLX90640_16_HZ);
 
         printMLX_current_settings();

@@ -14,12 +14,12 @@ namespace Main
         USB_ASCII_ART = 3,
         USB_TEMP_VALUES_ASCII = 4,
         UNKNOWN_LAST = 5
-    }OUTPUT_TARGET;
+    } OUTPUT_TARGET;
 
     OUTPUT_TARGET outTarget = OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE; 
     void(*outTargetCb)(void);
 
-    #define COLOR_PALETTE_COUNT 288
+    #define COLOR_PALETTE_COUNT 320
 
 
     CRGB camColors[COLOR_PALETTE_COUNT];
