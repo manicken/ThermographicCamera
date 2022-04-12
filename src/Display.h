@@ -78,7 +78,8 @@ namespace Display
         tft.setRotation(2);
 #elif defined(_ADAFRUIT_ILI9341H_)
         //tft.begin(10000000); // 10MHz from datasheet spec.
-        tft.begin(25000000); // 25MHz overclock
+        tft.begin(20000000); // 20MHz overclock
+        //tft.begin(62500000); // 62.5MHz super overclock
         tft.setRotation(1);
 #endif
         //setColorMode(tft, ST77XX_ColorMode::RGB565);
@@ -190,18 +191,20 @@ namespace Display
             tft.printf("MLX Failed:%d", read_status);
         }
     }
-    
-
+    float gblurTemp[32*2*24*2];
     void print_BiqubicInterpolated()
     {
-        static float gblurTemp[32*2*24*2];
+        
         //static float gblurTemp2[32*2*2*24*2*2];
         printMaxMin();
         //t = millis();
-        gblur.calculate(ThermalCamera::frame, gblurTemp, 32, 24);
+        gblur.calculate(ThermalCamera::frame, gblurTemp);//, 32, 24);
+        //gblur.calculate(Main::dest_2d, gblurTemp , 32*2, 24*2);
+        //INTERPOLATED_COLS = 32*8;
+        //INTERPOLATED_ROWS = 24*8;
+        //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
-        //INTERPOLATED_COLS = 32*2;
-        //INTERPOLATED_ROWS = 24*2;
+        
 
         //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         

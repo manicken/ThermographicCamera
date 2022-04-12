@@ -12,25 +12,41 @@
 
 //#define SIGMA_1
 //#define SIGMA_05
-#define SIGMA_2
+//#define SIGMA_02
+//#define SIGMA_2
+//#define SIGMA_4
+//#define SIGMA_8
+#define SIGMA_16
 
 //  Different kernels:
 #if defined(SIGMA_1)
-//Sigma=1
-#define P0 (0.077847)
-#define P1 (0.123317+0.077847)
-#define P2 (0.195346+0.123317+0.123317+0.077847)
-#elif defined(SIGMA_05)
-  //Sigma=0.5
+  #define P0 (0.077847)
+  #define P1 (0.123317+0.077847)
+  #define P2 (0.195346+0.123317+0.123317+0.077847)
+#elif defined(SIGMA_05) //Sigma=0.5
   #define P0 (0.024879)
   #define P1 (0.107973+0.024879)
   #define P2 (0.468592+0.107973+0.107973+0.024879)
+#elif defined(SIGMA_02) //Sigma=0.2
+  #define P0 (0.000039)
+  #define P1 (0.006133+0.000039)
+  #define P2 (0.975316+0.006133+0.006133+0.000039)
 #elif defined(SIGMA_2)
-
-  //Sigma=2
   #define P0 (0.102059)
   #define P1 (0.115349+0.102059)
   #define P2 (0.130371+0.115349+0.115349+0.102059)
+#elif defined(SIGMA_4)
+  #define P0 (0.108808)
+  #define P1 (0.112244+0.108808)
+  #define P2 (0.115788+0.112244+0.112244+0.108808)
+#elif defined(SIGMA_8)
+  #define P0 (0.110533)
+  #define P1 (0.111399+0.110533)
+  #define P2 (0.112271+0.111399+0.111399+0.110533)
+#elif defined(SIGMA_16)
+  #define P0 (0.110966)
+  #define P1 (0.111183+0.110966)
+  #define P2 (0.111400+0.111183+0.111183+0.110966)
 #endif
 
 class GBlur
@@ -85,10 +101,10 @@ class GBlur
     {
         float pix;
 
-        const int offsets2[4][4] =
+        int offsets2[4][4] =
         {
-            { -source_width - 1, -source_width, -1, 0},
-            { -source_width, -source_width + 1, 0, 1},
+            { -(source_width) - 1, -(source_width), -1, 0},
+            { -(source_width), -(source_width) + 1, 0, 1},
             { -1, 0, source_width, source_width + 1},
             {0, 1, source_width, source_width + 1}
         };

@@ -1,19 +1,19 @@
 #include <Arduino.h>
 #include "interpolation.h"
 
-float get_point(float *p, int16_t rows, int16_t cols, int16_t x, int16_t y);
-void set_point(float *p, int16_t rows, int16_t cols, int16_t x, int16_t y,
+float get_point(float *p, INT_TYPE rows, INT_TYPE cols, INT_TYPE x, INT_TYPE y);
+void set_point(float *p, INT_TYPE rows, INT_TYPE cols, INT_TYPE x, INT_TYPE y,
                float f);
-void get_adjacents_1d(float *src, float *dest, int16_t rows, int16_t cols,
-                      int16_t x, int16_t y);
-void get_adjacents_2d(float *src, float *dest, int16_t rows, int16_t cols,
-                      int16_t x, int16_t y);
+void get_adjacents_1d(float *src, float *dest, INT_TYPE rows, INT_TYPE cols,
+                      INT_TYPE x, INT_TYPE y);
+void get_adjacents_2d(float *src, float *dest, INT_TYPE rows, INT_TYPE cols,
+                      INT_TYPE x, INT_TYPE y);
 float cubicInterpolate(float p[], float x);
 float bicubicInterpolate(float p[], float x, float y);
-void interpolate_image(float *src, int16_t src_rows, int16_t src_cols,
-                       float *dest, int16_t dest_rows, int16_t dest_cols);
+void interpolate_image(float *src, INT_TYPE src_rows, INT_TYPE src_cols,
+                       float *dest, INT_TYPE dest_rows, INT_TYPE dest_cols);
 
-float get_point(float *p, int16_t rows, int16_t cols, int16_t x, int16_t y) {
+float get_point(float *p, INT_TYPE rows, INT_TYPE cols, INT_TYPE x, INT_TYPE y) {
   if (x < 0)
     x = 0;
   if (y < 0)
@@ -25,7 +25,7 @@ float get_point(float *p, int16_t rows, int16_t cols, int16_t x, int16_t y) {
   return p[y * cols + x];
 }
 
-void set_point(float *p, int16_t rows, int16_t cols, int16_t x, int16_t y,
+void set_point(float *p, INT_TYPE rows, INT_TYPE cols, INT_TYPE x, INT_TYPE y,
                float f) {
   if ((x < 0) || (x >= cols))
     return;
@@ -36,15 +36,15 @@ void set_point(float *p, int16_t rows, int16_t cols, int16_t x, int16_t y,
 
 // src is a grid src_rows * src_cols
 // dest is a pre-allocated grid, dest_rows*dest_cols
-void interpolate_image(float *src, int16_t src_rows, int16_t src_cols,
-                       float *dest, int16_t dest_rows, int16_t dest_cols) {
+void interpolate_image(float *src, INT_TYPE src_rows, INT_TYPE src_cols,
+                       float *dest, INT_TYPE dest_rows, INT_TYPE dest_cols) {
   float mu_x = (src_cols - 1.0) / (dest_cols - 1.0);
   float mu_y = (src_rows - 1.0) / (dest_rows - 1.0);
 
   float adj_2d[16]; // matrix for storing adjacents
 
-  for (int16_t y_idx = 0; y_idx < dest_rows; y_idx++) {
-    for (int16_t x_idx = 0; x_idx < dest_cols; x_idx++) {
+  for (INT_TYPE y_idx = 0; y_idx < dest_rows; y_idx++) {
+    for (INT_TYPE x_idx = 0; x_idx < dest_cols; x_idx++) {
       float x = x_idx * mu_x;
       float y = y_idx * mu_y;
       // Serial.print("("); Serial.print(y_idx); Serial.print(", ");
@@ -63,7 +63,8 @@ void interpolate_image(float *src, int16_t src_rows, int16_t src_cols,
       float frac_y = y - (int)y; // we only need the ~delta~ between the points
       float out = bicubicInterpolate(adj_2d, frac_x, frac_y);
       // Serial.print("\tInterp: "); Serial.println(out);
-      set_point(dest, dest_rows, dest_cols, x_idx, y_idx, out);
+      //set_point(dest, dest_rows, dest_cols, x_idx, y_idx, out); // this feels very uncessesarry as everything is allready in bounds
+      dest[y_idx*dest_cols+x_idx] = out;
     }
   }
 }
@@ -96,8 +97,8 @@ float bicubicInterpolate(float p[], float x, float y) {
 }
 
 // src is rows*cols and dest is a 4-point array passed in already allocated!
-void get_adjacents_1d(float *src, float *dest, int16_t rows, int16_t cols,
-                      int16_t x, int16_t y) {
+void get_adjacents_1d(float *src, float *dest, INT_TYPE rows, INT_TYPE cols,
+                      INT_TYPE x, INT_TYPE y) {
   // Serial.print("("); Serial.print(x); Serial.print(", "); Serial.print(y);
   // Serial.println(")");
   // pick two items to the left
@@ -109,14 +110,14 @@ void get_adjacents_1d(float *src, float *dest, int16_t rows, int16_t cols,
 }
 
 // src is rows*cols and dest is a 16-point array passed in already allocated!
-void get_adjacents_2d(float *src, float *dest, int16_t rows, int16_t cols,
-                      int16_t x, int16_t y) {
+void get_adjacents_2d(float *src, float *dest, INT_TYPE rows, INT_TYPE cols,
+                      INT_TYPE x, INT_TYPE y) {
   // Serial.print("("); Serial.print(x); Serial.print(", "); Serial.print(y);
   // Serial.println(")");
   float arr[4];
-  for (int16_t delta_y = -1; delta_y < 3; delta_y++) { // -1, 0, 1, 2
+  for (INT_TYPE delta_y = -1; delta_y < 3; delta_y++) { // -1, 0, 1, 2
     float *row = dest + 4 * (delta_y + 1); // index into each chunk of 4
-    for (int16_t delta_x = -1; delta_x < 3; delta_x++) { // -1, 0, 1, 2
+    for (INT_TYPE delta_x = -1; delta_x < 3; delta_x++) { // -1, 0, 1, 2
       row[delta_x + 1] = get_point(src, rows, cols, x + delta_x, y + delta_y);
     }
   }

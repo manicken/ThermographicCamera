@@ -23,7 +23,7 @@ namespace Main
 
 
     CRGB camColors[COLOR_PALETTE_COUNT];
-    int16_t currentColorMapIndex = 0;
+    int16_t currentColorMapIndex = 1;
 
 
     float dest_2d[320 * 240];
