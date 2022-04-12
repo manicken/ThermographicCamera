@@ -194,19 +194,16 @@ namespace Display
     float gblurTemp[32*2*24*2];
     void print_BiqubicInterpolated()
     {
-        
-        //static float gblurTemp2[32*2*2*24*2*2];
         printMaxMin();
         //t = millis();
         gblur.calculate(ThermalCamera::frame, gblurTemp);//, 32, 24);
-        //gblur.calculate(Main::dest_2d, gblurTemp , 32*2, 24*2);
-        //INTERPOLATED_COLS = 32*8;
-        //INTERPOLATED_ROWS = 24*8;
-        //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
-        interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
-        
+        interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2);
+        interpolate_image(Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2, gblurTemp, 24, 32);
+        interpolate_image(gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
 
         //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+        //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, gblurTemp, 24*2, 32*2);
+        //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         
         //Serial.print("Interpolation took "); Serial.print(millis()-t); Serial.println(" ms");
         //t = millis();
