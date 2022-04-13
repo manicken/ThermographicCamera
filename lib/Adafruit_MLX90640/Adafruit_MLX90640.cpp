@@ -63,6 +63,7 @@ int Adafruit_MLX90640::MLX90640_I2CRead(uint8_t slaveAddr,
                                   false)) {
       return -1;
     }
+    
     // we now have to swap every two bytes
     for (int i = 0; i < toRead16; i++) {
       data[i] = __builtin_bswap16(data[i]);
