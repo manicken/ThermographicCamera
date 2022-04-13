@@ -93,6 +93,64 @@ void setup() {
     fastLoop();
 }
 
+// draft for multitasking
+int execGetFrame = 0;
+int getFrameDone = 0;
+void getFrame_Thread()
+{
+    while(1){
+        if (execGetFrame == 0) yield(); // if nothing to do yield to allow other tasks to run
+        getFrameDone = 0;
+        read_status = ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
+        getFrameDone = 1; // to signal to the 'main' thread that a frame has been read
+        execGetFrame = 0;
+    }
+}
+int execDoInterpolation = 0;
+int interpolationDone = 0;
+void interpolation_Thread()
+{
+    while(1){
+        if (execDoInterpolation == 0) yield(); // if nothing to do yield to allow other tasks to run
+        interpolationDone = 0;
+        // this is only a placeholder draft for the actual interpolation function
+        // interpolation loop start
+        // interpolation task (one step)
+        // yield() // to allow other threads to run
+        // interpolation loop end
+        interpolationDone = 1;
+        execDoInterpolation = 0;
+    }
+}
+
+void main_Thread() // this is the main controller
+{
+    // here the initial exec must be done
+    execGetFrame = 1;
+    yield(); // this will then allow the getframe to start
+    while(1)
+    {
+        // when a frame read is done, a interpolation is not in progress and a interpolation is not done
+        if (getFrameDone == 1 && execDoInterpolation == 0 && interpolationDone == 0) { 
+            getFrameDone = 0;
+            // copy frame to interpolation task buffer (768 float values = 3072 bytes)
+            execDoInterpolation = 1;
+            execGetFrame = 1; // start a new frame read
+        }
+        else if (interpolationDone == 1)
+        {
+            interpolationDone = 0;
+            // write interpolated data to screen or usb stream
+            // this write will not use any yield as it should happen fast
+            // to minimize screen flicker
+        }
+
+        // button/touch read stuff here
+        
+        yield();
+    }
+}
+
 void fastLoop() {
     while(1) {
         SerialRemoteControl::ReadSerial();
@@ -116,9 +174,7 @@ void fastLoop() {
         if (read_status != 0)
             return;
         //Serial.printf("mlx.getFrame time:%d\n",(millis()-t));
-        
-        ThermalCamera::getMinMaxTemps();
-        
+
         //t = millis();
         Main::outTargetCb();
 

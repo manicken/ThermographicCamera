@@ -39,12 +39,16 @@ namespace ThermalCamera
             if (res != 0) return res;
         }
         average();
+        getMinMaxTemps();
         return 0;
     }
 #else
     int getFrame()
     {
-        return mlx.getFrame(frame);
+        int res = mlx.getFrame(frame);
+        if (res != 0) return res; // some error has occured
+        getMinMaxTemps();
+        return 0;
     }
 #endif
 

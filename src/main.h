@@ -16,6 +16,12 @@ namespace Main
         UNKNOWN_LAST = 5
     } OUTPUT_TARGET;
 
+    typedef enum {
+        START = 0
+    } MAIN_THREAD_STATE;
+
+    MAIN_THREAD_STATE mainState = MAIN_THREAD_STATE::START;
+
     OUTPUT_TARGET outTarget = OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE; 
     void(*outTargetCb)(void);
 
