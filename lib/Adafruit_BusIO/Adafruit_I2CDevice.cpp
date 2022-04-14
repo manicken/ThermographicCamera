@@ -90,6 +90,7 @@ bool Adafruit_I2CDevice::detected(void) {
  *    @param  stop Whether to send an I2C STOP signal on write
  *    @return True if write was successful, otherwise false.
  */
+#define DEBUG_SERIAL Serial
 bool Adafruit_I2CDevice::write(const uint8_t *buffer, size_t len, bool stop,
                                const uint8_t *prefix_buffer,
                                size_t prefix_len) {
@@ -152,7 +153,7 @@ bool Adafruit_I2CDevice::write(const uint8_t *buffer, size_t len, bool stop,
   if (_wire->endTransmission(stop) == 0) {
 #ifdef DEBUG_SERIAL
     DEBUG_SERIAL.println();
-    // DEBUG_SERIAL.println("Sent!");
+     DEBUG_SERIAL.println("Sent!");
 #endif
     return true;
   } else {
@@ -236,10 +237,12 @@ bool Adafruit_I2CDevice::_read(uint8_t *buffer, size_t len, bool stop) {
 bool Adafruit_I2CDevice::write_then_read(const uint8_t *write_buffer,
                                          size_t write_len, uint8_t *read_buffer,
                                          size_t read_len, bool stop) {
+    Serial.println("write_then_read write start");
   if (!write(write_buffer, write_len, stop)) {
+      Serial.println("write_then_read write error");
     return false;
   }
-
+    Serial.println("write_then_read write  done");
   return read(read_buffer, read_len);
 }
 

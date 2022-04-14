@@ -12,7 +12,10 @@ namespace ThermalCamera
     Adafruit_MLX90640 mlx;
     float minTemp = 15.0f;
     float maxTemp = 20.0f;
-    float frame[TC_PIXELCOUNT]; // buffer for full frame of temperatures
+    // having two buffers allows to both read from sensor
+    // and to do interpolation at the same time
+    float frameTemp[TC_PIXELCOUNT]; // this is the actual read buffer, when a completed frame has been read the contents of this is copied to frame
+    float frame[TC_PIXELCOUNT]; // this contain the last completed read frame and is used by the interpolation
 
 #if AVERAGE_FRAME_READS > 1
     float frames[AVERAGE_FRAME_READS][TC_PIXELCOUNT];
@@ -43,29 +46,31 @@ namespace ThermalCamera
         return 0;
     }
 #else
-    int getFrame()
-    {
-        int res = mlx.getFrame(frame);
-        if (res != 0) return res; // some error has occured
-        getMinMaxTemps();
-        return 0;
-    }
-#endif
-
-    void getMinMaxTemps()
+    void copyFromFrameTempAndGetMinMaxTemps()
     {
         minTemp = 500.0f;
         maxTemp = -40.0f;
-        for (uint8_t h=0; h<24; h++) {
-            for (uint8_t w=0; w<32; w++) {
-                float t = frame[h*32 + w];
-                if (t > maxTemp)
-                    maxTemp = t;
-                if (t < minTemp)
-                    minTemp = t;
-            }
+        for (int i=0;i<TC_PIXELCOUNT;i++) {
+            frame[i] = frameTemp[i];
+            float t = frame[i];
+            if (t > maxTemp)
+                maxTemp = t;
+            if (t < minTemp)
+                minTemp = t;
         }
     }
+
+    int getFrame()
+    {
+        //int res = mlx.getFrame(frameTemp);
+        //if (res != 0) return res; // some error has occured
+        
+        return mlx.getFrame(frameTemp);
+    }
+    
+#endif
+
+    
 
     void printMLX_current_settings()
     {

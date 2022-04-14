@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "GradientPalette_Structs.h"
+#include <TeensyThreads.h>
 
 namespace Main
 {
@@ -23,7 +24,11 @@ namespace Main
     MAIN_THREAD_STATE mainState = MAIN_THREAD_STATE::START;
 
     OUTPUT_TARGET outTarget = OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE; 
-    void(*outTargetCb)(void);
+    void(*CallBack_outTarget_Print)(void);
+
+    void(*CallBack_outTarget_Interpolate)(void);
+
+    void nonInterpolate(void) { }
 
     #define COLOR_PALETTE_COUNT 320
 
@@ -33,6 +38,9 @@ namespace Main
 
 
     float dest_2d[320 * 240];
+
+   
+
 }
 
 #endif

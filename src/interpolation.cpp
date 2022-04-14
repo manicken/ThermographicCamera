@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <TeensyThreads.h>
 #include "interpolation.h"
 
 float get_point(float *p, INT_TYPE rows, INT_TYPE cols, INT_TYPE x, INT_TYPE y);
@@ -65,6 +66,8 @@ void interpolate_image(float *src, INT_TYPE src_rows, INT_TYPE src_cols,
       // Serial.print("\tInterp: "); Serial.println(out);
       //set_point(dest, dest_rows, dest_cols, x_idx, y_idx, out); // this feels very uncessesarry as everything is allready in bounds
       dest[y_idx*dest_cols+x_idx] = out;
+
+      threads.yield();
     }
   }
 }

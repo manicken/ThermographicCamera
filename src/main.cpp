@@ -13,13 +13,38 @@
 //#include <SerialCommands.h>
 #include "SerialRemoteControl.h"
 
+//#define USE_THREADS
+
 uint32_t t = 0;// used for easy timing stuff
 int read_status = 0;
 uint32_t fps = 0;
 
-void fastLoop(); // forward declaration
+ // forward declarations
+void fastLoop();
+void setGradientColorMap(int index);
+void print_CurrentGradientColorPalette();
+void btnTask();
+void setInterpolatedSize(int width, int height);
+void setOutTarget(int target_id);
+void initAndStartThreading();
+
 Button btnUp(5);
 Button btnDown(6);
+
+void btnTask()
+{
+    if (btnDown.pressed() && Main::currentColorMapIndex != (GradientPalettes::Count-1)){
+        Main::currentColorMapIndex++;
+        //if (currentColorMapIndex == GradientPalettes::Count) currentColorMapIndex = (GradientPalettes::Count-1);
+        setGradientColorMap(Main::currentColorMapIndex);
+        Serial.println("btnDown");
+    }
+    if (btnUp.pressed() && Main::currentColorMapIndex != 0){
+        Main::currentColorMapIndex--;
+        //if (currentColorMapIndex == 0) currentColorMapIndex = (GradientPalettes::Count-1);
+        setGradientColorMap(Main::currentColorMapIndex);
+    }
+}
 
 void print_CurrentGradientColorPalette()
 {
@@ -54,16 +79,26 @@ void setOutTarget(int target_id)
 {
     Main::outTarget = (Main::OUTPUT_TARGET)target_id;
 
-    if (Main::outTarget == Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE) 
-        Main::outTargetCb = &Display::print_BiqubicInterpolated;
-    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_VIDEO_STREAM)
-        Main::outTargetCb = &USBSerialStream::print_BiqubicInterpolated;
-    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_TEMP_VALUES_ASCII)
-        Main::outTargetCb = &USBSerialStream::printTempValues;
-    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_ASCII_ART)
-        Main::outTargetCb = &USBSerialStream::printAsASCIIART;
-    else if (Main::outTarget == Main::OUTPUT_TARGET::TFT_RAW_PIXELS)
-        Main::outTargetCb = &Display::printNonInterpolated;
+    if (Main::outTarget == Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE) {
+        Main::CallBack_outTarget_Print = &Display::print_BiqubicInterpolated;
+        Main::CallBack_outTarget_Interpolate = &Display::execInterpolate;
+    }
+    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_VIDEO_STREAM) {
+        Main::CallBack_outTarget_Print = &USBSerialStream::print_BiqubicInterpolated;
+        Main::CallBack_outTarget_Interpolate = &USBSerialStream::execInterpolate;
+    }
+    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_TEMP_VALUES_ASCII) {
+        Main::CallBack_outTarget_Print = &USBSerialStream::printTempValues;
+        Main::CallBack_outTarget_Interpolate = &Main::nonInterpolate;
+    }
+    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_ASCII_ART) {
+        Main::CallBack_outTarget_Print = &USBSerialStream::printAsASCIIART;
+        Main::CallBack_outTarget_Interpolate = &Main::nonInterpolate;
+    }
+    else if (Main::outTarget == Main::OUTPUT_TARGET::TFT_RAW_PIXELS) {
+        Main::CallBack_outTarget_Print = &Display::printNonInterpolated;
+        Main::CallBack_outTarget_Interpolate = &Main::nonInterpolate;
+    }
     else 
     {
 
@@ -71,6 +106,27 @@ void setOutTarget(int target_id)
 
     print_CurrentGradientColorPalette();
 }
+uint32_t somethingTriggeredYield = 0;
+
+#if defined(USE_THREADS)
+void(*yieldCB)(void);
+void yield()
+{
+    somethingTriggeredYield++;
+    //Serial.println("yield"); // this will cause a infinite loop
+    if (yieldCB != NULL)
+        yieldCB();
+    //
+}
+#else
+/*void yield()
+{
+    // this is just a test to see if normal behaviour happends without predefined yield function
+}*/
+#endif
+
+
+
 
 void setup() {
     Display::Init();
@@ -90,36 +146,52 @@ void setup() {
     ThermalCamera::Init();
 
     //loop = loop2;
+#if defined(USE_THREADS)
+    initAndStartThreading();
+#else
     fastLoop();
+#endif
+    
 }
 
 // draft for multitasking
-int execGetFrame = 0;
-int getFrameDone = 0;
+unsigned int execGetFrame = 0;
+unsigned int getFrameDone = 0;
 void getFrame_Thread()
 {
     while(1){
-        if (execGetFrame == 0) yield(); // if nothing to do yield to allow other tasks to run
-        getFrameDone = 0;
-        read_status = ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
-        getFrameDone = 1; // to signal to the 'main' thread that a frame has been read
-        execGetFrame = 0;
+        if (execGetFrame == 0) threads.yield(); // if nothing to do yield to allow other tasks to run
+        else
+        {
+            getFrameDone = 0;
+            Serial.println("get frame start!");
+            read_status = ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
+            //Display::printStatusMsg(read_status);
+            Serial.println("get frame done!");
+            getFrameDone = 1; // to signal to the 'main' thread that a frame has been read
+            execGetFrame = 0;
+        }
     }
 }
-int execDoInterpolation = 0;
-int interpolationDone = 0;
+unsigned int execDoInterpolation = 0;
+unsigned int interpolationDone = 0;
 void interpolation_Thread()
 {
     while(1){
-        if (execDoInterpolation == 0) yield(); // if nothing to do yield to allow other tasks to run
-        interpolationDone = 0;
-        // this is only a placeholder draft for the actual interpolation function
-        // interpolation loop start
-        // interpolation task (one step)
-        // yield() // to allow other threads to run
-        // interpolation loop end
-        interpolationDone = 1;
-        execDoInterpolation = 0;
+        if (execDoInterpolation == 0) threads.yield(); // if nothing to do yield to allow other tasks to run
+        else
+        {
+            interpolationDone = 0;
+            //Serial.println("interpolation started");
+            // this is only a placeholder draft for the actual interpolation function
+            // interpolation loop start
+            // interpolation task (one step)
+            // yield() // to allow other threads to run
+            // interpolation loop end
+            Main::CallBack_outTarget_Interpolate();
+            interpolationDone = 1;
+            execDoInterpolation = 0;
+        }
     }
 }
 
@@ -127,44 +199,57 @@ void main_Thread() // this is the main controller
 {
     // here the initial exec must be done
     execGetFrame = 1;
-    yield(); // this will then allow the getframe to start
+    threads.yield(); // this will then allow the getframe to start
     while(1)
     {
+        
         // when a frame read is done, a interpolation is not in progress and a interpolation is not done
         if (getFrameDone == 1 && execDoInterpolation == 0 && interpolationDone == 0) { 
             getFrameDone = 0;
+            Serial.println("get frame done");
             // copy frame to interpolation task buffer (768 float values = 3072 bytes)
+            ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
             execDoInterpolation = 1;
             execGetFrame = 1; // start a new frame read
         }
         else if (interpolationDone == 1)
         {
+            //Serial.println("interpolation done");
             interpolationDone = 0;
+            Main::CallBack_outTarget_Print();
             // write interpolated data to screen or usb stream
             // this write will not use any yield as it should happen fast
             // to minimize screen flicker
         }
 
         // button/touch read stuff here
-        
-        yield();
+        SerialRemoteControl::ReadSerial();
+        btnTask();
+        if (somethingTriggeredYield > 1) {
+            Serial.printf("yield %d\n", somethingTriggeredYield);
+            somethingTriggeredYield=0;
+        }
+        threads.yield();
     }
 }
+
+void initAndStartThreading(){
+    threads.setSliceMillis(1000);
+    threads.addThread(getFrame_Thread);
+    threads.addThread(interpolation_Thread);
+#if defined(USE_THREADS)
+    yieldCB = &threads.yield;
+#endif
+    //threads.addThread(main_Thread);
+    main_Thread();
+}
+
 
 void fastLoop() {
     while(1) {
         SerialRemoteControl::ReadSerial();
-
-        if (btnDown.pressed() && Main::currentColorMapIndex != (GradientPalettes::Count-1)){
-            Main::currentColorMapIndex++;
-            //if (currentColorMapIndex == GradientPalettes::Count) currentColorMapIndex = (GradientPalettes::Count-1);
-            setGradientColorMap(Main::currentColorMapIndex);
-        }
-        if (btnUp.pressed() && Main::currentColorMapIndex != 0){
-            Main::currentColorMapIndex--;
-            //if (currentColorMapIndex == 0) currentColorMapIndex = (GradientPalettes::Count-1);
-            setGradientColorMap(Main::currentColorMapIndex);
-        }
+        btnTask();
+        
         //delay(100);
         fps = millis();
         //t = millis();
@@ -174,9 +259,10 @@ void fastLoop() {
         if (read_status != 0)
             return;
         //Serial.printf("mlx.getFrame time:%d\n",(millis()-t));
-
+        ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
         //t = millis();
-        Main::outTargetCb();
+        Main::CallBack_outTarget_Interpolate();
+        Main::CallBack_outTarget_Print();
 
         //Serial.print("Redraw took "); Serial.print(millis()-t); Serial.println(" ms");
         Display::printFps(1000.0f/(float)(millis()-fps));

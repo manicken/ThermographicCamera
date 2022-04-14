@@ -49,10 +49,15 @@ namespace USBSerialStream
         //Serial.printf("txtMaxT %.2f\n", maxTemp);
     }
 
+    void execInterpolate()
+    {
+        interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+    }
+
     void print_BiqubicInterpolated()
     {
+        //execInterpolate();
         print_MinMidMax();
-        interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         print_temperatures();
     }
 

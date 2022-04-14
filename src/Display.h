@@ -191,22 +191,28 @@ namespace Display
             tft.printf("MLX Failed:%d", read_status);
         }
     }
+
     float gblurTemp[32*2*24*2];
-    void print_BiqubicInterpolated()
+    void execInterpolate()
     {
-        printMaxMin();
         //t = millis();
         gblur.calculate(ThermalCamera::frame, gblurTemp);//, 32, 24);
         interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2);
         interpolate_image(Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2, gblurTemp, 24, 32);
         interpolate_image(gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
-
         //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, gblurTemp, 24*2, 32*2);
         //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
-        
+
         //Serial.print("Interpolation took "); Serial.print(millis()-t); Serial.println(" ms");
+    }
+
+    
+    void print_BiqubicInterpolated()
+    {
+        //execInterpolate();
         //t = millis();
+        printMaxMin();
         print_temperatures(); // this takes almost the same time ~34mS as the following two, but would not require additional ram usage
         //Serial.print("Interpolation draw took "); Serial.print(millis()-t); Serial.println(" ms");
     }

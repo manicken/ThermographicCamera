@@ -58,7 +58,7 @@ int Adafruit_MLX90640::MLX90640_I2CRead(uint8_t slaveAddr,
 
     cmd[0] = startAddress >> 8;
     cmd[1] = startAddress & 0x00FF;
-    // Serial.printf("Reading %d words\n", toRead16);
+     Serial.printf("Reading %d words\n", toRead16);
     if (!i2c_dev->write_then_read(cmd, 2, (uint8_t *)data, toRead16 * 2,
                                   false)) {
       return -1;
@@ -170,7 +170,7 @@ int Adafruit_MLX90640::getFrame(float *framebuf) {
   float tr = 23.15;
   uint16_t mlx90640Frame[834];
   int status;
-
+   // Serial.print("MLX90640_GetFrameData");
   for (uint8_t page = 0; page < 2; page++) {
     status = MLX90640_GetFrameData(0, mlx90640Frame);
 
