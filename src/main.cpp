@@ -209,6 +209,7 @@ uint32_t outputStartTime = 0;
 uint32_t outputTime = 0;
 void main_Thread() // this is the main controller
 {
+    fpsStartTime = millis();
     // here the initial exec must be done
     execGetFrame = 1;
     threads.yield(); // this will then allow the getframe to start
@@ -223,7 +224,7 @@ void main_Thread() // this is the main controller
             ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
             execDoInterpolation = 1;
             execGetFrame = 1; // start a new frame read
-            fpsStartTime = millis();
+           
         }
         else if (interpolationDone == 1)// && getFrameDone == 1) // 
         {
@@ -233,12 +234,11 @@ void main_Thread() // this is the main controller
             Main::CallBack_outTarget_Print();
             outputTime = millis()-outputStartTime;
             // write interpolated data to screen or usb stream
-            // this write will not use any yield as it should happen fast
-            // to minimize screen flicker
             //Serial.printf("fRTi:%d, ipTi:%d, outTi:%d", frameReadTime, interpolationTime, outputTime);
             //Serial.printf(", ipSU: %d, gFStU: %d\n",threads.getStackUsed(interpolation_Thread_Id), threads.getStackUsed(getFrame_Thread_Id));
             fpsTime = millis() - fpsStartTime;
             Display::printFps(1000.0f/(float)fpsTime);
+            fpsStartTime = millis();
         }
 
         // button/touch read stuff here
