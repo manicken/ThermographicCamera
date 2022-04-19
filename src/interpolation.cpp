@@ -42,7 +42,7 @@ void interpolate_image(float *src, INT_TYPE src_rows, INT_TYPE src_cols,
   float mu_x = (src_cols - 1.0) / (dest_cols - 1.0);
   float mu_y = (src_rows - 1.0) / (dest_rows - 1.0);
 
-  static float adj_2d[16]; // matrix for storing adjacents
+  static float adj_2d[16]; // matrix for storing adjacents // static remove stack usage while doing TeensyThreads
 
   for (INT_TYPE y_idx = 0; y_idx < dest_rows; y_idx++) {
     for (INT_TYPE x_idx = 0; x_idx < dest_cols; x_idx++) {
@@ -92,7 +92,7 @@ float cubicInterpolate(float p[], float x) {
 
 // p is a 16-point 4x4 array of the 2 rows & columns left/right/above/below
 float bicubicInterpolate(float p[], float x, float y) {
-  static float arr[4] = {0, 0, 0, 0};
+  static float arr[4] = {0, 0, 0, 0}; // static remove stack usage while doing TeensyThreads
   arr[0] = cubicInterpolate(p + 0, x);
   arr[1] = cubicInterpolate(p + 4, x);
   arr[2] = cubicInterpolate(p + 8, x);

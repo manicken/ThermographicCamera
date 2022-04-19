@@ -37,6 +37,8 @@ namespace Display
     
     
 #if defined(_ADAFRUIT_ST7789H_)
+    #define TFT_SCREEN_WIDTH          240
+    #define TFT_SCREEN_HEIGHT         240
     #define INTERPOLATED_COLS_DEFAULT 224
     #define INTERPOLATED_ROWS_DEFAULT 168
     #define MAX_MID_MIN_TEXTS_Y_POS   180
@@ -44,6 +46,8 @@ namespace Display
     #define COLOR_PALETTE_Y_POS       200
     Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
 #elif defined(_ADAFRUIT_ILI9341H_)
+    #define TFT_SCREEN_WIDTH          320
+    #define TFT_SCREEN_HEIGHT         240
     #define INTERPOLATED_COLS_DEFAULT 288
     #define INTERPOLATED_ROWS_DEFAULT 208
     #define MAX_MID_MIN_TEXTS_Y_POS   210
@@ -73,7 +77,7 @@ namespace Display
     {
 
 #if defined(_ADAFRUIT_ST7789H_)
-        tft.init(240, 240);   // initialize a ST7789 chip, 240x240 pixels
+        tft.init(TFT_SCREEN_WIDTH, TFT_SCREEN_HEIGHT);   // initialize a ST7789 chip, 240x240 pixels
         tft.enableDisplay(true);
         tft.setRotation(2);
 #elif defined(_ADAFRUIT_ILI9341H_)
@@ -141,7 +145,7 @@ namespace Display
                 tft.SPI_WRITE16(color);
 
                 //yield();
-                if (yieldWaitCounter != 16) yieldWaitCounter++;
+                if (yieldWaitCounter != INTERPOLATED_COLS/8) yieldWaitCounter++;
                 else
                 {
                     yieldWaitCounter = 0;
@@ -184,7 +188,7 @@ namespace Display
     void printFps(float fps)
     {
         tft.setTextSize(1);
-        tft.fillRect(1, 230, 8*6, 7, COLOR_BLACK);
+        tft.fillRect(1, 230, 9*6, 7, COLOR_BLACK);
         tft.setCursor(1, 230);
         tft.print("fps:");
         tft.print(fps);
@@ -193,23 +197,23 @@ namespace Display
     void printStatusMsg(int read_status)
     {
         //tft.fillRect(0, 220, 240, 14, ST77XX_BLACK);
-        if (read_status != 0)
-        {
+        
             Serial.printf("log Failed:%d", read_status);
-            tft.fillRect(0, 220, 240, 14, COLOR_BLACK);
-            tft.setTextSize(2);
+            tft.fillRect(1, 230, 13*6, 7, COLOR_BLACK);
+            tft.setCursor(TFT_SCREEN_WIDTH-13*6, 230);
+            tft.setTextSize(1);
             tft.setTextColor(COLOR_RED);
             tft.setCursor(0, 220);
             tft.printf("MLX Failed:%d", read_status);
-        }
+        //}
     }
-
+    #define INTERPOLATE_SMOOTH_FACTOR 5 // max is 10
     void execInterpolate()
     {
         //t = millis();
         Main::gblur.calculate(ThermalCamera::frame, Main::gblurTemp);//, 32, 24);
-        interpolate_image(Main::gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2);
-        interpolate_image(Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2, Main::gblurTemp, 24, 32);
+        interpolate_image(Main::gblurTemp, 24*2, 32*2, Main::dest_2d, 24*INTERPOLATE_SMOOTH_FACTOR, 32*INTERPOLATE_SMOOTH_FACTOR);
+        interpolate_image(Main::dest_2d, 24*INTERPOLATE_SMOOTH_FACTOR, 32*INTERPOLATE_SMOOTH_FACTOR, Main::gblurTemp, 24, 32);
         interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, gblurTemp, 24*2, 32*2);

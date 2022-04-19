@@ -166,7 +166,7 @@ void getFrame_Thread()
             frameReadStartTime = millis();
             getFrameDone = 0;
             //Serial.println("get frame start!");
-            ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
+            read_status = ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
             //Display::printStatusMsg(read_status);
             //Serial.println("get frame done!");
             getFrameDone = 1; // to signal to the 'main' thread that a frame has been read
@@ -238,6 +238,7 @@ void main_Thread() // this is the main controller
             //Serial.printf(", ipSU: %d, gFStU: %d\n",threads.getStackUsed(interpolation_Thread_Id), threads.getStackUsed(getFrame_Thread_Id));
             fpsTime = millis() - fpsStartTime;
             Display::printFps(1000.0f/(float)fpsTime);
+            if (read_status != 0) Display::printStatusMsg(read_status);
             fpsStartTime = millis();
         }
 
