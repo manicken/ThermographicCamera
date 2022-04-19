@@ -17,7 +17,7 @@
 
 uint32_t t = 0;// used for easy timing stuff
 int read_status = 0;
-uint32_t fps = 0;
+
 
  // forward declarations
 void fastLoop();
@@ -154,6 +154,7 @@ void setup() {
 // draft for multitasking
 unsigned int execGetFrame = 0;
 unsigned int getFrameDone = 0;
+uint32_t frameReadStartTime = 0;
 uint32_t frameReadTime = 0;
 int getFrame_Thread_Id = 0;
 void getFrame_Thread()
@@ -162,7 +163,7 @@ void getFrame_Thread()
         if (execGetFrame == 0) threads.yield(); // if nothing to do yield to allow other tasks to run
         else
         {
-            //frameReadTime = millis();
+            frameReadStartTime = millis();
             getFrameDone = 0;
             //Serial.println("get frame start!");
             ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
@@ -170,12 +171,14 @@ void getFrame_Thread()
             //Serial.println("get frame done!");
             getFrameDone = 1; // to signal to the 'main' thread that a frame has been read
             execGetFrame = 0;
+            frameReadTime = millis() - frameReadStartTime;
             //Serial.printf("frameReadTime:%d\n", millis() - frameReadTime);
         }
     }
 }
 unsigned int execDoInterpolation = 0;
 unsigned int interpolationDone = 0;
+uint32_t interpolationStartTime = 0;
 uint32_t interpolationTime = 0;
 int interpolation_Thread_Id = 0;
 void interpolation_Thread()
@@ -184,7 +187,7 @@ void interpolation_Thread()
         if (execDoInterpolation == 0) threads.yield(); // if nothing to do yield to allow other tasks to run
         else
         {
-            //interpolationTime = millis();
+            interpolationStartTime = millis();
             interpolationDone = 0;
             //Serial.println("interpolation started");
             // this is only a placeholder draft for the actual interpolation function
@@ -195,11 +198,15 @@ void interpolation_Thread()
             Main::CallBack_outTarget_Interpolate();
             interpolationDone = 1;
             execDoInterpolation = 0;
+            interpolationTime = millis() - interpolationStartTime;
             //Serial.printf("interpolationTime:%d\n", millis() - interpolationTime);
         }
     }
 }
-
+uint32_t fpsStartTime = 0;
+uint32_t fpsTime = 0;
+uint32_t outputStartTime = 0;
+uint32_t outputTime = 0;
 void main_Thread() // this is the main controller
 {
     // here the initial exec must be done
@@ -216,23 +223,28 @@ void main_Thread() // this is the main controller
             ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
             execDoInterpolation = 1;
             execGetFrame = 1; // start a new frame read
-            fps = millis();
+            fpsStartTime = millis();
         }
-        else if (interpolationDone == 1)
+        else if (interpolationDone == 1)// && getFrameDone == 1) // 
         {
             //Serial.println("interpolation done");
             interpolationDone = 0;
+            outputStartTime = millis();
             Main::CallBack_outTarget_Print();
+            outputTime = millis()-outputStartTime;
             // write interpolated data to screen or usb stream
             // this write will not use any yield as it should happen fast
             // to minimize screen flicker
-             Display::printFps(1000.0f/(float)(millis()-fps));
+            //Serial.printf("fRTi:%d, ipTi:%d, outTi:%d", frameReadTime, interpolationTime, outputTime);
+            //Serial.printf(", ipSU: %d, gFStU: %d\n",threads.getStackUsed(interpolation_Thread_Id), threads.getStackUsed(getFrame_Thread_Id));
+            fpsTime = millis() - fpsStartTime;
+            Display::printFps(1000.0f/(float)fpsTime);
         }
 
         // button/touch read stuff here
         SerialRemoteControl::ReadSerial();
         btnTask();
-        //Serial.printf("interpolateStackUsed: %d, getFrameStackUsed: %d\n",threads.getStackUsed(interpolation_Thread_Id), threads.getStackUsed(getFrame_Thread_Id));
+        
         threads.yield();
     }
 }
@@ -257,7 +269,7 @@ void fastLoop() {
         btnTask();
         
         //delay(100);
-        fps = millis();
+        fpsTime = millis();
         //t = millis();
         
         read_status = ThermalCamera::getFrame();
@@ -271,7 +283,7 @@ void fastLoop() {
         Main::CallBack_outTarget_Print();
 
         //Serial.print("Redraw took "); Serial.print(millis()-t); Serial.println(" ms");
-        Display::printFps(1000.0f/(float)(millis()-fps));
+        Display::printFps(1000.0f/(float)(millis()-fpsTime));
 
         yield();
     }

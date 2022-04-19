@@ -7,7 +7,7 @@
 #include "ThermalCamera.h"
 #include "GradientPalette_Structs.h"
 #include "interpolation.h"
-#include "GBlur.h"
+
 #include <Adafruit_GFX.h>
 //#include <Adafruit_ST7789.h> // uncomment to use ST7789, comment to use ILI9341
 #include <Adafruit_ILI9341.h> // uncomment to use ILI9341, comment to use ST7789
@@ -34,7 +34,7 @@
 
 namespace Display
 {
-    GBlur gblur;
+    
     
 #if defined(_ADAFRUIT_ST7789H_)
     #define INTERPOLATED_COLS_DEFAULT 224
@@ -79,7 +79,8 @@ namespace Display
 #elif defined(_ADAFRUIT_ILI9341H_)
         //tft.begin(10000000); // 10MHz from datasheet spec.
         tft.begin(20000000); // 20MHz overclock
-        //tft.begin(62500000); // 62.5MHz super overclock
+        //tft.begin(40000000); // 40MHz overclock
+        //tft.begin(62500000); // 62.5MHz max overclock
         tft.setRotation(1);
 #endif
         //setColorMode(tft, ST77XX_ColorMode::RGB565);
@@ -108,16 +109,16 @@ namespace Display
         tft.endWrite();
     }
 
-    void printMaxMin()
+    void printMinMidMax()
     {
         // clear prev text
-        tft.fillRect(0, MAX_MID_MIN_TEXTS_Y_POS, COLOR_PALETTE_COUNT, MAX_MID_MIN_TEXTS_SIZE*7, COLOR_BLACK);
+        tft.fillRect(1, MAX_MID_MIN_TEXTS_Y_POS, COLOR_PALETTE_COUNT, MAX_MID_MIN_TEXTS_SIZE*7, COLOR_BLACK);
         //tft.fillRect(180, 180, 60, 14, COLOR_BLACK);
 
         // print new text
         tft.setTextSize(MAX_MID_MIN_TEXTS_SIZE);
         tft.setTextColor(COLOR_WHITE);
-        tft.setCursor(0, MAX_MID_MIN_TEXTS_Y_POS);
+        tft.setCursor(2, MAX_MID_MIN_TEXTS_Y_POS);
         tft.print(ThermalCamera::minTemp);
         tft.setCursor(COLOR_PALETTE_COUNT/2-2.5*6*MAX_MID_MIN_TEXTS_SIZE, MAX_MID_MIN_TEXTS_Y_POS);
         tft.print((ThermalCamera::maxTemp-ThermalCamera::minTemp)/2+ThermalCamera::minTemp);
@@ -127,8 +128,9 @@ namespace Display
 
     void print_temperatures()
     {
+        static uint32_t yieldWaitCounter = 0;
         tft.startWrite();
-        tft.setAddrWindow(0, 0, INTERPOLATED_COLS, INTERPOLATED_ROWS);
+        tft.setAddrWindow(2, 2, INTERPOLATED_COLS, INTERPOLATED_ROWS);
         for (int16_t r=0; r<INTERPOLATED_ROWS; r++) {
             for (int16_t c=INTERPOLATED_COLS-1; c>=0; c--) { // draw cols in reverse order because data from MLX is reversed
                 int index = r*INTERPOLATED_COLS + c;
@@ -137,7 +139,16 @@ namespace Display
                 uint16_t color = Main::camColors[colorIndex].toRGB565();
 
                 tft.SPI_WRITE16(color);
+
+                //yield();
+                if (yieldWaitCounter != 16) yieldWaitCounter++;
+                else
+                {
+                    yieldWaitCounter = 0;
+                    yield();
+                }
             }
+            //yield();
         }
         
         tft.endWrite();
@@ -152,6 +163,7 @@ namespace Display
                 colorIndex = constrain(colorIndex, 0, COLOR_PALETTE_COUNT-1);
                 tft.fillRect((31-w)*7, h*7, 7, 7, Main::camColors[colorIndex].toRGB565());
             }
+            
         }
     }
 
@@ -172,8 +184,8 @@ namespace Display
     void printFps(float fps)
     {
         tft.setTextSize(1);
-        tft.fillRect(0, 230, 8*6, 7, COLOR_BLACK);
-        tft.setCursor(0, 230);
+        tft.fillRect(1, 230, 8*6, 7, COLOR_BLACK);
+        tft.setCursor(1, 230);
         tft.print("fps:");
         tft.print(fps);
     }
@@ -192,14 +204,13 @@ namespace Display
         }
     }
 
-    float gblurTemp[32*2*24*2];
     void execInterpolate()
     {
         //t = millis();
-        gblur.calculate(ThermalCamera::frame, gblurTemp);//, 32, 24);
-        interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2);
-        interpolate_image(Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2, gblurTemp, 24, 32);
-        interpolate_image(gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+        Main::gblur.calculate(ThermalCamera::frame, Main::gblurTemp);//, 32, 24);
+        interpolate_image(Main::gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2);
+        interpolate_image(Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2, Main::gblurTemp, 24, 32);
+        interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, gblurTemp, 24*2, 32*2);
         //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
@@ -212,7 +223,7 @@ namespace Display
     {
         //execInterpolate();
         //t = millis();
-        printMaxMin();
+        printMinMidMax();
         print_temperatures(); // this takes almost the same time ~34mS as the following two, but would not require additional ram usage
         //Serial.print("Interpolation draw took "); Serial.print(millis()-t); Serial.println(" ms");
     }

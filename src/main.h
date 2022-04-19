@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "GradientPalette_Structs.h"
+#include "GBlur.h"
 #include <TeensyThreads.h>
 
 namespace Main
@@ -39,7 +40,8 @@ namespace Main
 
     float dest_2d[320 * 240];
 
-   
+    GBlur gblur;
+    float gblurTemp[32*2*24*2];
 
 }
 

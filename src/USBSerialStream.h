@@ -27,7 +27,7 @@ namespace USBSerialStream
             for (int16_t c=INTERPOLATED_COLS-1; c>=0; c--) { // draw cols in reverse order because data from MLX is reversed
                 int index = r*INTERPOLATED_COLS + c;
                 float t = Main::dest_2d[index];
-                uint8_t colorIndex = constrain(map(t, ThermalCamera::minTemp, ThermalCamera::maxTemp, 0, COLOR_PALETTE_COUNT-1), 0, COLOR_PALETTE_COUNT-1);
+                uint16_t colorIndex = constrain(map(t, ThermalCamera::minTemp, ThermalCamera::maxTemp, 0, COLOR_PALETTE_COUNT-1), 0, COLOR_PALETTE_COUNT-1);
                 Serial.write(&Main::camColors[colorIndex].arr[1], 3);
             }
         }
@@ -48,10 +48,16 @@ namespace USBSerialStream
         //Serial.printf("txtMidT %.2f\n", mid);
         //Serial.printf("txtMaxT %.2f\n", maxTemp);
     }
+    
 
     void execInterpolate()
     {
-        interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+        //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+
+        Main::gblur.calculate(ThermalCamera::frame, Main::gblurTemp);//, 32, 24);
+        interpolate_image(Main::gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2);
+        interpolate_image(Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2, Main::gblurTemp, 24, 32);
+        interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
     }
 
     void print_BiqubicInterpolated()
