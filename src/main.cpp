@@ -13,7 +13,7 @@
 //#include <SerialCommands.h>
 #include "SerialRemoteControl.h"
 
-//#define USE_THREADS
+#define USE_THREADS
 
 uint32_t t = 0;// used for easy timing stuff
 int read_status = 0;

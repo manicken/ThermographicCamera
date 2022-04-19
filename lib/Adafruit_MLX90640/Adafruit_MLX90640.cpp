@@ -165,11 +165,12 @@ void Adafruit_MLX90640::setRefreshRate(mlx90640_refreshrate_t rate) {
  *    @param  framebuf 24*32 floating point memory buffer
  *    @return 0 on success
  */
+
 int Adafruit_MLX90640::getFrame(float *framebuf) {
-  float emissivity = 0.95;
-  float tr = 23.15;
-  uint16_t mlx90640Frame[834];
-  int status;
+  static float emissivity = 0.95;
+  static float tr = 23.15;
+  static uint16_t mlx90640Frame[834]; // static makes the multithreading switching much faster
+  static int status;
    // Serial.print("MLX90640_GetFrameData");
   for (uint8_t page = 0; page < 2; page++) {
     status = MLX90640_GetFrameData(0, mlx90640Frame);

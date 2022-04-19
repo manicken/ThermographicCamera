@@ -44,12 +44,14 @@ int Adafruit_MLX90640::MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData)
 
 int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
 {
-    uint16_t dataReady = 1;
-    uint16_t controlRegister1;
-    uint16_t statusRegister;
-    int error = 1;
-    uint8_t cnt = 0;
+    static uint16_t dataReady = 1;
+    static uint16_t controlRegister1 = 0;
+    static uint16_t statusRegister = 0;
+    static int error = 1;
+    static uint8_t cnt = 0;
     
+    cnt = 0;
+    error = 1;
     dataReady = 0;
     while(dataReady == 0)
     {
