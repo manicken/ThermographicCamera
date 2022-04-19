@@ -102,7 +102,7 @@ namespace ThermalCamera
         }
     }
 
-    void Init()
+    void Init(mlx90640_mode_t mode, mlx90640_resolution_t resolution, mlx90640_refreshrate_t refreshrate)
     {
         Serial.println("log Adafruit MLX90640 Simple Test");
         Wire.setClock(1000000);
@@ -119,10 +119,10 @@ namespace ThermalCamera
         Serial.println(mlx.serialNumber[2], HEX);
         
         //mlx.setMode(MLX90640_INTERLEAVED);
-        mlx.setMode(MLX90640_CHESS);
+        mlx.setMode(mode);
         
-        mlx.setResolution(MLX90640_ADC_16BIT);
-        mlx.setRefreshRate(MLX90640_16_HZ);
+        mlx.setResolution(resolution);
+        mlx.setRefreshRate(refreshrate);
 
         printMLX_current_settings();
     }

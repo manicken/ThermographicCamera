@@ -140,7 +140,7 @@ void setup() {
     setOutTarget(Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE);
     setGradientColorMap(Main::currentColorMapIndex);
 
-    ThermalCamera::Init();
+    ThermalCamera::Init(MLX90640_CHESS, MLX90640_ADC_16BIT, MLX90640_16_HZ);
 
     //loop = loop2;
 #if defined(USE_THREADS)
@@ -151,7 +151,7 @@ void setup() {
     
 }
 
-// draft for multitasking
+
 unsigned int execGetFrame = 0;
 unsigned int getFrameDone = 0;
 uint32_t frameReadStartTime = 0;
