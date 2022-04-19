@@ -109,7 +109,7 @@ void setOutTarget(int target_id)
 uint32_t somethingTriggeredYield = 0;
 
 #if defined(USE_THREADS)
-void(*yieldCB)(void);
+void(*yieldCB)(void); // using this ensure proper setup of threads before using it
 void yield()
 {
     somethingTriggeredYield++;
@@ -124,9 +124,6 @@ void yield()
     // this is just a test to see if normal behaviour happends without predefined yield function
 }*/
 #endif
-
-
-
 
 void setup() {
     Display::Init();
@@ -157,30 +154,37 @@ void setup() {
 // draft for multitasking
 unsigned int execGetFrame = 0;
 unsigned int getFrameDone = 0;
+uint32_t frameReadTime = 0;
+int getFrame_Thread_Id = 0;
 void getFrame_Thread()
 {
     while(1){
         if (execGetFrame == 0) threads.yield(); // if nothing to do yield to allow other tasks to run
         else
         {
+            //frameReadTime = millis();
             getFrameDone = 0;
-            Serial.println("get frame start!");
-            read_status = ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
+            //Serial.println("get frame start!");
+            ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
             //Display::printStatusMsg(read_status);
-            Serial.println("get frame done!");
+            //Serial.println("get frame done!");
             getFrameDone = 1; // to signal to the 'main' thread that a frame has been read
             execGetFrame = 0;
+            //Serial.printf("frameReadTime:%d\n", millis() - frameReadTime);
         }
     }
 }
 unsigned int execDoInterpolation = 0;
 unsigned int interpolationDone = 0;
+uint32_t interpolationTime = 0;
+int interpolation_Thread_Id = 0;
 void interpolation_Thread()
 {
     while(1){
         if (execDoInterpolation == 0) threads.yield(); // if nothing to do yield to allow other tasks to run
         else
         {
+            //interpolationTime = millis();
             interpolationDone = 0;
             //Serial.println("interpolation started");
             // this is only a placeholder draft for the actual interpolation function
@@ -191,6 +195,7 @@ void interpolation_Thread()
             Main::CallBack_outTarget_Interpolate();
             interpolationDone = 1;
             execDoInterpolation = 0;
+            //Serial.printf("interpolationTime:%d\n", millis() - interpolationTime);
         }
     }
 }
@@ -206,11 +211,12 @@ void main_Thread() // this is the main controller
         // when a frame read is done, a interpolation is not in progress and a interpolation is not done
         if (getFrameDone == 1 && execDoInterpolation == 0 && interpolationDone == 0) { 
             getFrameDone = 0;
-            Serial.println("get frame done");
+            //Serial.println("get frame done");
             // copy frame to interpolation task buffer (768 float values = 3072 bytes)
             ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
             execDoInterpolation = 1;
             execGetFrame = 1; // start a new frame read
+            fps = millis();
         }
         else if (interpolationDone == 1)
         {
@@ -220,23 +226,23 @@ void main_Thread() // this is the main controller
             // write interpolated data to screen or usb stream
             // this write will not use any yield as it should happen fast
             // to minimize screen flicker
+             Display::printFps(1000.0f/(float)(millis()-fps));
         }
 
         // button/touch read stuff here
         SerialRemoteControl::ReadSerial();
         btnTask();
-        if (somethingTriggeredYield > 1) {
-            Serial.printf("yield %d\n", somethingTriggeredYield);
-            somethingTriggeredYield=0;
-        }
+        //Serial.printf("interpolateStackUsed: %d, getFrameStackUsed: %d\n",threads.getStackUsed(interpolation_Thread_Id), threads.getStackUsed(getFrame_Thread_Id));
         threads.yield();
     }
 }
 
 void initAndStartThreading(){
-    threads.setSliceMillis(1000);
-    threads.addThread(getFrame_Thread);
-    threads.addThread(interpolation_Thread);
+    //threads.setSliceMicros(5);
+    //threads.setSliceMillis(1);
+    threads.setDefaultStackSize(4096);
+    getFrame_Thread_Id = threads.addThread(getFrame_Thread);
+    interpolation_Thread_Id = threads.addThread(interpolation_Thread);
 #if defined(USE_THREADS)
     yieldCB = &threads.yield;
 #endif

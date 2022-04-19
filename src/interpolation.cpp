@@ -67,8 +67,9 @@ void interpolate_image(float *src, INT_TYPE src_rows, INT_TYPE src_cols,
       //set_point(dest, dest_rows, dest_cols, x_idx, y_idx, out); // this feels very uncessesarry as everything is allready in bounds
       dest[y_idx*dest_cols+x_idx] = out;
 
-      threads.yield();
+      //threads.yield();
     }
+    
   }
 }
 

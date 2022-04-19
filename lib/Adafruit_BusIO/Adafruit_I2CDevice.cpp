@@ -90,7 +90,8 @@ bool Adafruit_I2CDevice::detected(void) {
  *    @param  stop Whether to send an I2C STOP signal on write
  *    @return True if write was successful, otherwise false.
  */
-#define DEBUG_SERIAL Serial
+//#define DEBUG_SERIAL Serial
+
 bool Adafruit_I2CDevice::write(const uint8_t *buffer, size_t len, bool stop,
                                const uint8_t *prefix_buffer,
                                size_t prefix_len) {
@@ -196,7 +197,9 @@ bool Adafruit_I2CDevice::_read(uint8_t *buffer, size_t len, bool stop) {
     // Not enough data available to fulfill our obligation!
 #ifdef DEBUG_SERIAL
     DEBUG_SERIAL.print(F("\tI2CDevice did not receive enough data: "));
-    DEBUG_SERIAL.println(recv);
+    DEBUG_SERIAL.print(recv);
+    DEBUG_SERIAL.print(F(" != "));
+    DEBUG_SERIAL.println(len);
 #endif
     return false;
   }
@@ -204,7 +207,7 @@ bool Adafruit_I2CDevice::_read(uint8_t *buffer, size_t len, bool stop) {
   for (uint16_t i = 0; i < len; i++) {
     buffer[i] = _wire->read();
   }
-
+    //Serial.println("########## read done");
 #ifdef DEBUG_SERIAL
   DEBUG_SERIAL.print(F("\tI2CREAD  @ 0x"));
   DEBUG_SERIAL.print(_addr, HEX);
@@ -237,12 +240,12 @@ bool Adafruit_I2CDevice::_read(uint8_t *buffer, size_t len, bool stop) {
 bool Adafruit_I2CDevice::write_then_read(const uint8_t *write_buffer,
                                          size_t write_len, uint8_t *read_buffer,
                                          size_t read_len, bool stop) {
-    Serial.println("write_then_read write start");
+    //Serial.println("write_then_read write start");
   if (!write(write_buffer, write_len, stop)) {
-      Serial.println("write_then_read write error");
+      //Serial.println("write_then_read write error");
     return false;
   }
-    Serial.println("write_then_read write  done");
+    //Serial.println("write_then_read write  done");
   return read(read_buffer, read_len);
 }
 

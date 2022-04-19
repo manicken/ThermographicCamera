@@ -58,12 +58,12 @@ int Adafruit_MLX90640::MLX90640_I2CRead(uint8_t slaveAddr,
 
     cmd[0] = startAddress >> 8;
     cmd[1] = startAddress & 0x00FF;
-     Serial.printf("Reading %d words\n", toRead16);
+     //Serial.printf("Reading %d words\n", toRead16);
     if (!i2c_dev->write_then_read(cmd, 2, (uint8_t *)data, toRead16 * 2,
                                   false)) {
       return -1;
     }
-    
+    //Serial.print("[done]\n");
     // we now have to swap every two bytes
     for (int i = 0; i < toRead16; i++) {
       data[i] = __builtin_bswap16(data[i]);

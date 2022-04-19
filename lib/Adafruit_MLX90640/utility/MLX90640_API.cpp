@@ -53,9 +53,9 @@ int Adafruit_MLX90640::MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameD
     dataReady = 0;
     while(dataReady == 0)
     {
-        Serial.println("MLX90640_I2CRead staart");
+        //Serial.println("MLX90640_GetFrameData start");
         error = MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
-        Serial.println("MLX90640_I2CRead ennd");
+        //Serial.println("MLX90640_GetFrameData end");
         if(error != 0)
         {
             
