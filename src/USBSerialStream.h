@@ -22,7 +22,7 @@ namespace USBSerialStream
     uint32_t frame = 0;
     void print_temperatures()
     {
-        Serial.printf("imgM_frame ");
+        Serial.print("frame ");
         Serial.println(frame++);
         Serial.print("imgM ");
         Serial.println(INTERPOLATED_ROWS*INTERPOLATED_COLS*3);
@@ -39,7 +39,7 @@ namespace USBSerialStream
     
     void print_MinMidMax()
     {
-        Serial.print("\ntxtMinT ");
+        Serial.print("txtMinT ");
         Serial.print(ThermalCamera::minTemp, 2);
         Serial.print("\ntxtMidT ");
         Serial.print((ThermalCamera::maxTemp-ThermalCamera::minTemp)/2+ThermalCamera::minTemp, 2);
