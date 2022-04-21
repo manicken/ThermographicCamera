@@ -44,6 +44,7 @@ namespace Display
     #define MAX_MID_MIN_TEXTS_Y_POS   180
     #define MAX_MID_MIN_TEXTS_SIZE    2
     #define COLOR_PALETTE_Y_POS       200
+    #define NON_INTERPOLATED_PIXEL_SIZE 7
     Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
 #elif defined(_ADAFRUIT_ILI9341H_)
     #define TFT_SCREEN_WIDTH          320
@@ -53,6 +54,7 @@ namespace Display
     #define MAX_MID_MIN_TEXTS_Y_POS   210
     #define MAX_MID_MIN_TEXTS_SIZE    1
     #define COLOR_PALETTE_Y_POS       219
+    #define NON_INTERPOLATED_PIXEL_SIZE 9
     Adafruit_ILI9341 tft = Adafruit_ILI9341(&SPI, TFT_DC, TFT_CS);
 #endif
     uint16_t INTERPOLATED_COLS = INTERPOLATED_COLS_DEFAULT;
@@ -158,17 +160,27 @@ namespace Display
         tft.endWrite();
     }
 
-    void printNonInterpolated()
+    void printFps(float fps)
     {
+        tft.setTextSize(1);
+        tft.fillRect(1, 230, 9*6, 7, COLOR_BLACK);
+        tft.setCursor(1, 230);
+        tft.print("fps:");
+        tft.print(fps);
+    }
+
+    void printNonInterpolated(float fps)
+    {
+        printMinMidMax();
         for (uint8_t h=0; h<24; h++) {
             for (uint8_t w=0; w<32; w++) {
                 float t = ThermalCamera::frame[h*32 + w];
                 uint8_t colorIndex = map(t, ThermalCamera::minTemp, ThermalCamera::maxTemp, 0, COLOR_PALETTE_COUNT-1);
                 colorIndex = constrain(colorIndex, 0, COLOR_PALETTE_COUNT-1);
-                tft.fillRect((31-w)*7, h*7, 7, 7, Main::camColors[colorIndex].toRGB565());
+                tft.fillRect((31-w)*NON_INTERPOLATED_PIXEL_SIZE, h*NON_INTERPOLATED_PIXEL_SIZE, NON_INTERPOLATED_PIXEL_SIZE, NON_INTERPOLATED_PIXEL_SIZE, Main::camColors[colorIndex].toRGB565());
             }
-            
         }
+        printFps(fps);
     }
 
     void printCurrentGradientColorPalette()
@@ -185,14 +197,7 @@ namespace Display
             drawRGBBitmap(0, COLOR_PALETTE_Y_POS+i, Main::camColors, COLOR_PALETTE_COUNT, 1);
     }
 
-    void printFps(float fps)
-    {
-        tft.setTextSize(1);
-        tft.fillRect(1, 230, 9*6, 7, COLOR_BLACK);
-        tft.setCursor(1, 230);
-        tft.print("fps:");
-        tft.print(fps);
-    }
+    
 
     void printStatusMsg(int read_status)
     {
@@ -223,13 +228,14 @@ namespace Display
     }
 
     
-    void print_BiqubicInterpolated()
+    void print_BiqubicInterpolated(float fps)
     {
         //execInterpolate();
         //t = millis();
         printMinMidMax();
         print_temperatures(); // this takes almost the same time ~34mS as the following two, but would not require additional ram usage
         //Serial.print("Interpolation draw took "); Serial.print(millis()-t); Serial.println(" ms");
+        printFps(fps);
     }
 
     /* not used in current design but keep it here just in case

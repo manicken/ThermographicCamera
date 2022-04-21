@@ -231,15 +231,17 @@ void main_Thread() // this is the main controller
             //Serial.println("interpolation done");
             interpolationDone = 0;
             outputStartTime = millis();
-            Main::CallBack_outTarget_Print();
+            fpsTime = millis() - fpsStartTime;
+            fpsStartTime = millis();
+            Main::CallBack_outTarget_Print(1000.0f/(float)fpsTime);
             outputTime = millis()-outputStartTime;
             // write interpolated data to screen or usb stream
             //Serial.printf("fRTi:%d, ipTi:%d, outTi:%d", frameReadTime, interpolationTime, outputTime);
             //Serial.printf(", ipSU: %d, gFStU: %d\n",threads.getStackUsed(interpolation_Thread_Id), threads.getStackUsed(getFrame_Thread_Id));
-            fpsTime = millis() - fpsStartTime;
-            Display::printFps(1000.0f/(float)fpsTime);
+            
+            //Display::printFps();
             if (read_status != 0) Display::printStatusMsg(read_status);
-            fpsStartTime = millis();
+            
         }
 
         // button/touch read stuff here
@@ -281,10 +283,10 @@ void fastLoop() {
         ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
         //t = millis();
         Main::CallBack_outTarget_Interpolate();
-        Main::CallBack_outTarget_Print();
+        Main::CallBack_outTarget_Print(1000.0f/(float)(millis()-fpsTime));
 
         //Serial.print("Redraw took "); Serial.print(millis()-t); Serial.println(" ms");
-        Display::printFps(1000.0f/(float)(millis()-fpsTime));
+        //Display::printFps());
 
         yield();
     }

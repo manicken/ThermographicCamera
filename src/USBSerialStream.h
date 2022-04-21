@@ -19,13 +19,12 @@ namespace USBSerialStream
         }
     }
 
-    uint32_t frame = 0;
+    
     void print_temperatures()
     {
-        Serial.print("frame ");
-        Serial.println(frame++);
-        Serial.print("imgM ");
-        Serial.println(INTERPOLATED_ROWS*INTERPOLATED_COLS*3);
+        
+
+        Serial.printf("imgM %d\n", INTERPOLATED_ROWS*INTERPOLATED_COLS*3);
 
         for (int16_t r=0; r<INTERPOLATED_ROWS; r++) {
             for (int16_t c=INTERPOLATED_COLS-1; c>=0; c--) { // draw cols in reverse order because data from MLX is reversed
@@ -35,6 +34,8 @@ namespace USBSerialStream
                 Serial.write(&Main::camColors[colorIndex].arr[1], 3);
             }
         }
+
+        
     }
     
     void print_MinMidMax()
@@ -64,16 +65,21 @@ namespace USBSerialStream
         interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
     }
 
-    void print_BiqubicInterpolated()
+    uint32_t frame = 0;
+    void print_BiqubicInterpolated(float fps)
     {
         //execInterpolate();
         print_MinMidMax();
         print_temperatures();
+        Serial.printf("frame %d\n", frame++); // Roboremo don't work if this is at the beginning
+        Serial.printf("fps "); // Roboremo don't work if this is at the beginning
+        Serial.print(fps,2);
+        Serial.print("\n");
     }
 
     
 
-    void printTempValues()
+    void printTempValues(float fps)
     {
         for (uint8_t h=0; h<24; h++) {
             for (uint8_t w=0; w<32; w++) {
@@ -85,7 +91,7 @@ namespace USBSerialStream
         }
     }
 
-    void printAsASCIIART()
+    void printAsASCIIART(float fps)
     {
         //Serial.println();
         //Serial.println();

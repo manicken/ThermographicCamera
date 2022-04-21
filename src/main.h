@@ -25,7 +25,7 @@ namespace Main
     MAIN_THREAD_STATE mainState = MAIN_THREAD_STATE::START;
 
     OUTPUT_TARGET outTarget = OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE; 
-    void(*CallBack_outTarget_Print)(void);
+    void(*CallBack_outTarget_Print)(float);
 
     void(*CallBack_outTarget_Interpolate)(void);
 
