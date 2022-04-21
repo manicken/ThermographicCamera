@@ -29,14 +29,16 @@
 #define TFT_SCK       13
 #define TFT_MOSI      11
 #define TFT_CS        10
-#define TFT_RST        9 // Or set to -1 and connect to Arduino RESET pin
+
 #define TFT_DC         8
+
 
 namespace Display
 {
     
     
 #if defined(_ADAFRUIT_ST7789H_)
+    #define TFT_RST        9 // only used by my CS enabled ST7789 display module
     #define TFT_SCREEN_WIDTH          240
     #define TFT_SCREEN_HEIGHT         240
     #define INTERPOLATED_COLS_DEFAULT 224
@@ -47,6 +49,7 @@ namespace Display
     #define NON_INTERPOLATED_PIXEL_SIZE 7
     Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
 #elif defined(_ADAFRUIT_ILI9341H_)
+    #define TFT_BL         9 
     #define TFT_SCREEN_WIDTH          320
     #define TFT_SCREEN_HEIGHT         240
     #define INTERPOLATED_COLS_DEFAULT 288
@@ -55,6 +58,8 @@ namespace Display
     #define MAX_MID_MIN_TEXTS_SIZE    1
     #define COLOR_PALETTE_Y_POS       219
     #define NON_INTERPOLATED_PIXEL_SIZE 9
+    #define TFT_CMD_DISPOFF 0x28
+    #define TFT_CMD_DISPON 0x29
     Adafruit_ILI9341 tft = Adafruit_ILI9341(&SPI, TFT_DC, TFT_CS);
 #endif
     uint16_t INTERPOLATED_COLS = INTERPOLATED_COLS_DEFAULT;
@@ -75,6 +80,9 @@ namespace Display
     }
 #endif
 
+    void enable();
+    void disable();
+
     void Init()
     {
 
@@ -93,6 +101,29 @@ namespace Display
 
         tft.setTextWrap(false); // Allow text to run off right edge
         tft.fillScreen(COLOR_BLACK);
+        
+        enable();
+    }
+
+    void enable()
+    {
+#if defined(_ADAFRUIT_ST7789H_)
+        tft.enableDisplay(true);
+#elif defined(_ADAFRUIT_ILI9341H_)
+        tft.sendCommand(TFT_CMD_DISPON);
+        digitalWrite(TFT_BL, LOW);
+#endif
+        
+    }
+
+    void disable()
+    {
+#if defined(_ADAFRUIT_ST7789H_)
+        tft.enableDisplay(false);
+#elif defined(_ADAFRUIT_ILI9341H_)
+        tft.sendCommand(TFT_CMD_DISPOFF);
+        digitalWrite(TFT_BL, HIGH);
+#endif
         
     }
 

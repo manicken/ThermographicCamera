@@ -82,22 +82,27 @@ void setOutTarget(int target_id)
     if (Main::outTarget == Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE) {
         Main::CallBack_outTarget_Print = &Display::print_BiqubicInterpolated;
         Main::CallBack_outTarget_Interpolate = &Display::execInterpolate;
+        Display::enable();
     }
     else if (Main::outTarget == Main::OUTPUT_TARGET::USB_VIDEO_STREAM) {
         Main::CallBack_outTarget_Print = &USBSerialStream::print_BiqubicInterpolated;
         Main::CallBack_outTarget_Interpolate = &USBSerialStream::execInterpolate;
+        Display::disable();
     }
     else if (Main::outTarget == Main::OUTPUT_TARGET::USB_TEMP_VALUES_ASCII) {
         Main::CallBack_outTarget_Print = &USBSerialStream::printTempValues;
         Main::CallBack_outTarget_Interpolate = &Main::nonInterpolate;
+        Display::disable();
     }
     else if (Main::outTarget == Main::OUTPUT_TARGET::USB_ASCII_ART) {
         Main::CallBack_outTarget_Print = &USBSerialStream::printAsASCIIART;
         Main::CallBack_outTarget_Interpolate = &Main::nonInterpolate;
+        Display::disable();
     }
     else if (Main::outTarget == Main::OUTPUT_TARGET::TFT_RAW_PIXELS) {
         Main::CallBack_outTarget_Print = &Display::printNonInterpolated;
         Main::CallBack_outTarget_Interpolate = &Main::nonInterpolate;
+        Display::enable();
     }
     else 
     {
