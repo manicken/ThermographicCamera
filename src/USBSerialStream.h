@@ -19,9 +19,13 @@ namespace USBSerialStream
         }
     }
 
+    uint32_t frame = 0;
     void print_temperatures()
     {
-        Serial.printf("imgM %d\n", INTERPOLATED_ROWS*INTERPOLATED_COLS*3);
+        Serial.printf("imgM_frame ");
+        Serial.println(frame++);
+        Serial.print("imgM ");
+        Serial.println(INTERPOLATED_ROWS*INTERPOLATED_COLS*3);
 
         for (int16_t r=0; r<INTERPOLATED_ROWS; r++) {
             for (int16_t c=INTERPOLATED_COLS-1; c>=0; c--) { // draw cols in reverse order because data from MLX is reversed
