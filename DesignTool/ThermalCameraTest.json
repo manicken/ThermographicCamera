@@ -1,0 +1,282 @@
+{
+    "version": 1,
+    "settings": {
+        "main": {},
+        "arduino": {
+            "ExportForOSC": true,
+            "useExportDialog": true,
+            "ProjectName": "TestDelayExtClass",
+            "StandardIncludeHeader": "#include <Arduino.h>\n#include <Audio.h>\n#include <Wire.h>\n#include <SPI.h>\n#include <SD.h>\n#include <SerialFlash.h>\n\n#include <OSCAudioBase.h>\n",
+            "Board": {
+                "Platform": "",
+                "Board": "teensy41",
+                "Options": ""
+            }
+        },
+        "BiDirDataWebSocketBridge": {},
+        "workspaces": {},
+        "sidebar": {},
+        "palette": {},
+        "editor": {},
+        "devTest": {},
+        "IndexedDBfiles": {
+            "testFileNames": "testFile.txt"
+        },
+        "NodeDefGenerator": {},
+        "NodeDefManager": {},
+        "NodeHelpManager": {},
+        "OSC": {
+            "RedirectDebugToConsole": false,
+            "Encoding": "0"
+        }
+    },
+    "workspaces": [
+        {
+            "type": "tab",
+            "id": "20220419T211522_989Z_a730",
+            "label": "ThermalCameraTest",
+            "nodes": [
+                {
+                    "id": "20220419T211653_865Z_e3c6",
+                    "type": "UI_Image",
+                    "name": "imgM",
+                    "tag": "",
+                    "comment": "",
+                    "w": 249,
+                    "h": 185,
+                    "textSize": 14,
+                    "imageWidth": "224",
+                    "imageHeight": "168",
+                    "x": 230,
+                    "y": 170,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#F6F8BC",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T211653_865Z_beb4",
+                    "type": "UI_Image",
+                    "name": "imgGP",
+                    "tag": "",
+                    "comment": "",
+                    "w": 312,
+                    "h": 47,
+                    "textSize": 14,
+                    "imageWidth": "320",
+                    "imageHeight": "10",
+                    "x": 220,
+                    "y": 325,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#F6F8BC",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T211653_865Z_2c5f",
+                    "type": "UI_ListBox",
+                    "name": "ListBox",
+                    "tag": "",
+                    "comment": "",
+                    "w": 139,
+                    "h": 480,
+                    "textSize": 14,
+                    "midiCh": "0",
+                    "midiId": "0",
+                    "itemTextSize": 14,
+                    "items": "Iron Bow\nRain Bow 0\narctic\nblack Hot\nblue Red\ncoldest\ncontrast\ndouble Rainbow\nglow Bow\ngray Red\ngrayscale\nhottest\nlava\nmedical\nrainbow\nwheel1\nwheel2\nwheel3\nwhite Hot\nyellow",
+                    "selectedIndex": 1,
+                    "selectedIndexOffset": 0,
+                    "headerHeight": 30,
+                    "itemBGcolor": "#F6F8BC",
+                    "sendCommand": "OSC.SendTextToSerial(\"setGradientColorMap \"+parseInt(d.selectedIndex)+\"\\n\");",
+                    "x": 480,
+                    "y": 355,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#F6F8BC",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T211803_607Z_55bb",
+                    "type": "UI_ScriptButton",
+                    "name": "TFT non interpolated",
+                    "tag": "",
+                    "comment": "OSC.SendTextToSerial(\"setOutTarget 0\\n\");",
+                    "w": 150,
+                    "h": 34,
+                    "textSize": 14,
+                    "nodes": [],
+                    "x": 655,
+                    "y": 95,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#DDFFBB",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T211803_608Z_9a23",
+                    "type": "UI_ScriptButton",
+                    "name": "TFT interpolated",
+                    "tag": "",
+                    "comment": "OSC.SendTextToSerial(\"setOutTarget 1\\n\");",
+                    "w": 152,
+                    "h": 34,
+                    "textSize": 14,
+                    "nodes": [],
+                    "x": 655,
+                    "y": 135,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#DDFFBB",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T211803_608Z_4dd",
+                    "type": "UI_ScriptButton",
+                    "name": "USB Streaming",
+                    "tag": "",
+                    "comment": "OSC.SendTextToSerial(\"setOutTarget 2\\n\");",
+                    "w": 150,
+                    "h": 30,
+                    "textSize": 14,
+                    "nodes": [],
+                    "x": 655,
+                    "y": 175,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#DDFFBB",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T212919_624Z_c3f0",
+                    "type": "UI_TextBox",
+                    "name": "txtMinT",
+                    "tag": "",
+                    "comment": "",
+                    "w": 73,
+                    "h": 34,
+                    "textSize": 14,
+                    "x": 108.5,
+                    "y": 422,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#F6F8BC",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T213016_221Z_f8c4",
+                    "type": "UI_TextBox",
+                    "name": "txtMidT",
+                    "tag": "",
+                    "comment": "",
+                    "w": 72,
+                    "h": 30,
+                    "textSize": 14,
+                    "x": 230,
+                    "y": 420,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#F6F8BC",
+                    "wires": []
+                },
+                {
+                    "id": "20220419T213018_020Z_c891",
+                    "type": "UI_TextBox",
+                    "name": "txtMaxT",
+                    "tag": "",
+                    "comment": "",
+                    "w": 70,
+                    "h": 30,
+                    "textSize": 14,
+                    "x": 344.5,
+                    "y": 420,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#F6F8BC",
+                    "wires": []
+                },
+                {
+                    "id": "20220421T205545_544Z_fffe",
+                    "type": "UI_TextBox",
+                    "name": "fps",
+                    "tag": "",
+                    "comment": "",
+                    "w": 60,
+                    "h": 30,
+                    "textSize": 14,
+                    "x": 105,
+                    "y": 480,
+                    "z": "20220419T211522_989Z_a730",
+                    "bgColor": "#F6F8BC",
+                    "wires": []
+                }
+            ],
+            "links": [],
+            "export": true,
+            "isMain": false,
+            "mainNameType": "tabName",
+            "mainNameExt": ".ino",
+            "isAudioMain": false,
+            "generateCppDestructor": false,
+            "extraClassDeclarations": "",
+            "settings": {
+                "guiEditMode": false
+            }
+        }
+    ],
+    "nodeAddons": {
+        "mine": {
+            "isAddon": true,
+            "label": "mine",
+            "description": "mine",
+            "credits": "me",
+            "homepage": "",
+            "url": "https://api.github.com/repos/[user]/[repository]/contents/[subpath if any]",
+            "types": {
+                "AudioEffectDelayExternal2": {
+                    "defaults": {
+                        "name": {
+                            "type": "c_cpp_name",
+                            "value": "20220403T144120_253Z_b198"
+                        },
+                        "id": {
+                            "noEdit": ""
+                        },
+                        "comment": {},
+                        "color": {
+                            "editor": {
+                                "type": "color"
+                            },
+                            "value": "#E6E0F8"
+                        },
+                        "arraySize": {
+                            "value": 1,
+                            "maxval": 255,
+                            "minval": 1,
+                            "type": "int",
+                            "editor": {
+                                "label": "Array Size",
+                                "help": "(not in use yet, as there is a lot of dependencies on the old style)<br>selects the array size,<br>a value of 0 or 1 mean no array<br>the max value is 255"
+                            }
+                        },
+                        "outputs": {
+                            "value": "8"
+                        },
+                        "memtype": {
+                            "type": "int",
+                            "value": "3"
+                        },
+                        "length": {
+                            "type": "float",
+                            "value": "2000.0"
+                        }
+                    },
+                    "makeConstructor": {
+                        "root": "packets.add(OSC.GetCreateObjectAddr(),\"ssif\",  \"AudioEffectDelayExternal\", n.name,          node.memtype,node.length);",
+                        "group": "packets.add(OSC.GetCreateObjectAddr(),\"sssif\", \"AudioEffectDelayExternal\", n.name, grpName, node.memtype,node.length);"
+                    },
+                    "editor": "autogen",
+                    "shortName": "delayExt2",
+                    "editorhelp": "",
+                    "inputs": 1,
+                    "outputs": 8,
+                    "category": "effect",
+                    "color": "#d6d0e8",
+                    "icon": "arrow-in.png"
+                }
+            }
+        }
+    }
+}
