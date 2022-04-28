@@ -117,6 +117,14 @@ void set_avgcc(int value)
     ThermalCamera::avg_cc = value;
 }
 
+int32_t new_mlx_update_rate = -1; // this is set to != -1 when the rate need to change
+
+void set_updateRate(int state)
+{
+    new_mlx_update_rate = state;
+    
+}
+
 
 uint32_t somethingTriggeredYield = 0;
 
@@ -148,7 +156,8 @@ void setup() {
     SerialRemoteControl::cmd_setGradientColorMap::SetCB("setGradientColorMap", &setGradientColorMap, GradientPalettes::Count);
     SerialRemoteControl::cmd_setInterpolatedSize::SetCB("setInterpolatedSize", &setInterpolatedSize, 32, 320, 24, 240);
     SerialRemoteControl::cmd_setOutTarget::SetCB("setOutTarget", &setOutTarget, Main::OUTPUT_TARGET::UNKNOWN_FIRST, Main::OUTPUT_TARGET::UNKNOWN_LAST);
-    SerialRemoteControl::cmd_setThermalCamera_AvgCurrentCount::SetCB("set_avgcc", &set_avgcc, AVERAGE_FRAME_READS);
+    SerialRemoteControl::cmd_setThermalCamera_AvgCurrentCount::SetCB("set_avgcc", &set_avgcc, AVERAGE_FRAME_MAX_READS);
+    SerialRemoteControl::cmd_setThermalCamera_UpdateRate::SetCB("set_updateRate", &set_updateRate, MLX90640_64_HZ);
     
     setOutTarget(Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE);
     setGradientColorMap(Main::currentColorMapIndex);
@@ -186,6 +195,11 @@ void getFrame_Thread()
             execGetFrame = 0;
             frameReadTime = millis() - frameReadStartTime;
             //Serial.printf("frameReadTime:%d\n", millis() - frameReadTime);
+            if (new_mlx_update_rate != -1) {
+                Serial.println("updated updaterate");
+                ThermalCamera::mlx.setRefreshRate((mlx90640_refreshrate_t)new_mlx_update_rate);
+                new_mlx_update_rate = -1;
+            }
         }
     }
 }

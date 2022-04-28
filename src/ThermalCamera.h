@@ -7,7 +7,8 @@
 
 namespace ThermalCamera
 {
-    #define AVERAGE_FRAME_READS 16
+    #define AVERAGE_FRAME_MAX_READS 32
+    #define AVERAGE_FRAME_DEFAULT 8
     #define TC_PIXELCOUNT 32*24
     Adafruit_MLX90640 mlx;
     float minTemp = 15.0f;
@@ -17,10 +18,10 @@ namespace ThermalCamera
     
     float frame[TC_PIXELCOUNT]; // this is the actual 'public' frame data that should be used
 
-#if AVERAGE_FRAME_READS > 1
+#if AVERAGE_FRAME_MAX_READS > 1
     float *avg_frames; //[AVERAGE_FRAME_READS][TC_PIXELCOUNT];
     int avg_cfi = 0; // average current frame index
-    int avg_cc = AVERAGE_FRAME_READS; // average current count, this makes it possible to change this dynamically
+    int avg_cc = AVERAGE_FRAME_DEFAULT; // average current count, this makes it possible to change this dynamically
 
     void updateFrameAndGetMinMaxTemps()
     {
@@ -112,9 +113,9 @@ namespace ThermalCamera
 
     void Init(mlx90640_mode_t mode, mlx90640_resolution_t resolution, mlx90640_refreshrate_t refreshrate)
     {
-#if AVERAGE_FRAME_READS > 1
-        avg_frames = (float*)malloc(AVERAGE_FRAME_READS*TC_PIXELCOUNT*4);
-        for (int i=0;i<(TC_PIXELCOUNT*AVERAGE_FRAME_READS);i++) {
+#if AVERAGE_FRAME_MAX_READS > 1
+        avg_frames = (float*)malloc(AVERAGE_FRAME_MAX_READS*TC_PIXELCOUNT*4);
+        for (int i=0;i<(TC_PIXELCOUNT*AVERAGE_FRAME_MAX_READS);i++) {
             avg_frames[i] = 0.0f;
         }
 #endif

@@ -146,7 +146,7 @@ namespace SerialRemoteControl
                 return;
             }
             int avg_cc = atoi(avg_cc_str);
-            if (avg_cc >= maxVal || avg_cc < 1)
+            if (avg_cc > maxVal || avg_cc < 1)
             {
                 sender->GetSerial()->printf("log ERROR_UNKNOWN_AVG_CURRENT_COUNT [%d]\r\n", avg_cc);
                 return;
@@ -158,6 +158,34 @@ namespace SerialRemoteControl
             cmd_setThermalCamera_AvgCurrentCount::cb = func;
             cmd_setThermalCamera_AvgCurrentCount::maxVal = maxVal;
             AddCommand(cmd, cmd_setThermalCamera_AvgCurrentCount::func);
+        }
+    }
+
+    namespace cmd_setThermalCamera_UpdateRate
+    { 
+        void(*cb)(int);
+        int maxVal;
+        void func(SerialCommands* sender)
+        {
+            char* rate_str = sender->Next();
+            if (rate_str == NULL)
+            {
+                sender->GetSerial()->println("log ERROR_NO_UPDATE_RATE");
+                return;
+            }
+            int rate = atoi(rate_str);
+            if (rate > maxVal || rate < 0)
+            {
+                sender->GetSerial()->printf("log ERROR_UNKNOWN_UPDATE_RATE != (0-7) [%d]\r\n", rate);
+                return;
+            }
+            cb(rate);
+        }
+        void SetCB(const char *cmd, void(*func)(int), int maxVal)
+        {
+            cmd_setThermalCamera_UpdateRate::cb = func;
+            cmd_setThermalCamera_UpdateRate::maxVal = maxVal;
+            AddCommand(cmd, cmd_setThermalCamera_UpdateRate::func);
         }
     }
 };
