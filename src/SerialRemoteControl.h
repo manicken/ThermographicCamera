@@ -132,4 +132,32 @@ namespace SerialRemoteControl
             AddCommand(cmd, cmd_setInterpolatedSize::func);
         }
     }
+
+    namespace cmd_setThermalCamera_AvgCurrentCount
+    { 
+        void(*cb)(int);
+        int maxVal;
+        void func(SerialCommands* sender)
+        {
+            char* avg_cc_str = sender->Next();
+            if (avg_cc_str == NULL)
+            {
+                sender->GetSerial()->println("log ERROR_NO_AVG_CURRENT_COUNT");
+                return;
+            }
+            int avg_cc = atoi(avg_cc_str);
+            if (avg_cc >= maxVal || avg_cc < 1)
+            {
+                sender->GetSerial()->printf("log ERROR_UNKNOWN_AVG_CURRENT_COUNT [%d]\r\n", avg_cc);
+                return;
+            }
+            cb(avg_cc);
+        }
+        void SetCB(const char *cmd, void(*func)(int), int maxVal)
+        {
+            cmd_setThermalCamera_AvgCurrentCount::cb = func;
+            cmd_setThermalCamera_AvgCurrentCount::maxVal = maxVal;
+            AddCommand(cmd, cmd_setThermalCamera_AvgCurrentCount::func);
+        }
+    }
 };

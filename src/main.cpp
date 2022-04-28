@@ -111,6 +111,13 @@ void setOutTarget(int target_id)
 
     print_CurrentGradientColorPalette();
 }
+
+void set_avgcc(int value)
+{
+    ThermalCamera::avg_cc = value;
+}
+
+
 uint32_t somethingTriggeredYield = 0;
 
 #if defined(USE_THREADS)
@@ -141,11 +148,12 @@ void setup() {
     SerialRemoteControl::cmd_setGradientColorMap::SetCB("setGradientColorMap", &setGradientColorMap, GradientPalettes::Count);
     SerialRemoteControl::cmd_setInterpolatedSize::SetCB("setInterpolatedSize", &setInterpolatedSize, 32, 320, 24, 240);
     SerialRemoteControl::cmd_setOutTarget::SetCB("setOutTarget", &setOutTarget, Main::OUTPUT_TARGET::UNKNOWN_FIRST, Main::OUTPUT_TARGET::UNKNOWN_LAST);
+    SerialRemoteControl::cmd_setThermalCamera_AvgCurrentCount::SetCB("set_avgcc", &set_avgcc, AVERAGE_FRAME_READS);
     
     setOutTarget(Main::OUTPUT_TARGET::TFT_BIQUBIC_INTERPOLATE);
     setGradientColorMap(Main::currentColorMapIndex);
 
-    ThermalCamera::Init(MLX90640_CHESS, MLX90640_ADC_16BIT, MLX90640_16_HZ);
+    ThermalCamera::Init(MLX90640_CHESS, MLX90640_ADC_18BIT, MLX90640_16_HZ);
 
     //loop = loop2;
 #if defined(USE_THREADS)
@@ -171,7 +179,7 @@ void getFrame_Thread()
             frameReadStartTime = millis();
             getFrameDone = 0;
             //Serial.println("get frame start!");
-            read_status = ThermalCamera::getFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
+            read_status = ThermalCamera::readFrame(); // at the lowest level @ I2C read there is a yield so other tasks can run
             //Display::printStatusMsg(read_status);
             //Serial.println("get frame done!");
             getFrameDone = 1; // to signal to the 'main' thread that a frame has been read
@@ -226,7 +234,7 @@ void main_Thread() // this is the main controller
             getFrameDone = 0;
             //Serial.println("get frame done");
             // copy frame to interpolation task buffer (768 float values = 3072 bytes)
-            ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
+            ThermalCamera::updateFrameAndGetMinMaxTemps();
             execDoInterpolation = 1;
             execGetFrame = 1; // start a new frame read
            
@@ -280,12 +288,12 @@ void fastLoop() {
         fpsTime = millis();
         //t = millis();
         
-        read_status = ThermalCamera::getFrame();
+        read_status = ThermalCamera::readFrame();
         Display::printStatusMsg(read_status);
         if (read_status != 0)
             return;
         //Serial.printf("mlx.getFrame time:%d\n",(millis()-t));
-        ThermalCamera::copyFromFrameTempAndGetMinMaxTemps();
+        ThermalCamera::updateFrameAndGetMinMaxTemps();
         //t = millis();
         Main::CallBack_outTarget_Interpolate();
         Main::CallBack_outTarget_Print(1000.0f/(float)(millis()-fpsTime));

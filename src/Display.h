@@ -8,6 +8,9 @@
 #include "GradientPalette_Structs.h"
 #include "interpolation.h"
 
+#include "../lib/FastGaussianBlur/fast_gaussian_blur_template.h"
+//#include "blur_float.h"
+
 #include <Adafruit_GFX.h>
 //#include <Adafruit_ST7789.h> // uncomment to use ST7789, comment to use ILI9341
 #include <Adafruit_ILI9341.h> // uncomment to use ILI9341, comment to use ST7789
@@ -203,10 +206,10 @@ namespace Display
     void printNonInterpolated(float fps)
     {
         printMinMidMax();
-        for (uint8_t h=0; h<24; h++) {
-            for (uint8_t w=0; w<32; w++) {
+        for (uint32_t h=0; h<24; h++) {
+            for (uint32_t w=0; w<32; w++) {
                 float t = ThermalCamera::frame[h*32 + w];
-                uint8_t colorIndex = map(t, ThermalCamera::minTemp, ThermalCamera::maxTemp, 0, COLOR_PALETTE_COUNT-1);
+                uint32_t colorIndex = map(t, ThermalCamera::minTemp, ThermalCamera::maxTemp, 0, COLOR_PALETTE_COUNT-1);
                 colorIndex = constrain(colorIndex, 0, COLOR_PALETTE_COUNT-1);
                 tft.fillRect((31-w)*NON_INTERPOLATED_PIXEL_SIZE, h*NON_INTERPOLATED_PIXEL_SIZE, NON_INTERPOLATED_PIXEL_SIZE, NON_INTERPOLATED_PIXEL_SIZE, Main::camColors[colorIndex].toRGB565());
             }
@@ -243,15 +246,30 @@ namespace Display
             tft.printf("MLX Failed:%d", read_status);
         //}
     }
+    float *temp;
+    void copyFromTempTodest2d()
+    {
+        for (int i=0;i<76800;i++)
+            Main::dest_2d[i] = temp[i];
+    }
+    
     #define INTERPOLATE_SMOOTH_FACTOR 5 // max is 10
     void execInterpolate()
     {
         //t = millis();
-        Main::gblur.calculate(ThermalCamera::frame, Main::gblurTemp);//, 32, 24);
-        interpolate_image(Main::gblurTemp, 24*2, 32*2, Main::dest_2d, 24*INTERPOLATE_SMOOTH_FACTOR, 32*INTERPOLATE_SMOOTH_FACTOR);
-        interpolate_image(Main::dest_2d, 24*INTERPOLATE_SMOOTH_FACTOR, 32*INTERPOLATE_SMOOTH_FACTOR, Main::gblurTemp, 24, 32);
-        interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
-        //interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+        //if (temp == NULL) temp = (float*)malloc(76800);
+        
+       // fast_gaussian_blur<float>(ThermalCamera::frame, Main::gblurTemp, 24, 32, 1, 1.0f, 1);
+        //interpolate_image(ThermalCamera::frame, 24, 32, temp, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+        //copyFromTempTodest2d();
+        //fast_gaussian_blur<float>(temp, Main::dest_2d, INTERPOLATED_COLS, INTERPOLATED_ROWS, 1, 2.0f);
+
+        //Main::gblur.calculate(ThermalCamera::frame, Main::gblurTemp);//, 32, 24);
+        //interpolate_image(Main::gblurTemp, 24*2, 32*2, Main::dest_2d, 24*INTERPOLATE_SMOOTH_FACTOR, 32*INTERPOLATE_SMOOTH_FACTOR);
+        //interpolate_image(Main::dest_2d, 24*INTERPOLATE_SMOOTH_FACTOR, 32*INTERPOLATE_SMOOTH_FACTOR, Main::gblurTemp, 24, 32);
+        //interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+        
+        interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, gblurTemp, 24*2, 32*2);
         //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
 

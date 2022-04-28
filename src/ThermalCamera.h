@@ -7,46 +7,55 @@
 
 namespace ThermalCamera
 {
-    #define AVERAGE_FRAME_READS 1
+    #define AVERAGE_FRAME_READS 16
     #define TC_PIXELCOUNT 32*24
     Adafruit_MLX90640 mlx;
     float minTemp = 15.0f;
     float maxTemp = 20.0f;
     // having two buffers allows to both read from sensor
     // and to do interpolation at the same time
-    float frameTemp[TC_PIXELCOUNT]; // this is the actual read buffer, when a completed frame has been read the contents of this is copied to frame
-    float frame[TC_PIXELCOUNT]; // this contain the last completed read frame and is used by the interpolation
+    
+    float frame[TC_PIXELCOUNT]; // this is the actual 'public' frame data that should be used
 
 #if AVERAGE_FRAME_READS > 1
-    float frames[AVERAGE_FRAME_READS][TC_PIXELCOUNT];
+    float *avg_frames; //[AVERAGE_FRAME_READS][TC_PIXELCOUNT];
+    int avg_cfi = 0; // average current frame index
+    int avg_cc = AVERAGE_FRAME_READS; // average current count, this makes it possible to change this dynamically
 
-    void average()
+    void updateFrameAndGetMinMaxTemps()
     {
-        for (int di=0;di<TC_PIXELCOUNT;di++)
-        {
+        minTemp = 500.0f;
+        maxTemp = -40.0f;
+        for (int pi=0;pi<TC_PIXELCOUNT;pi++) {
             float avg = 0;
-            for (int i=0;i<AVERAGE_FRAME_READS;i++)
+            for (int fi=0;fi<avg_cc;fi++)
             {
-                avg += frames[i][di];
+                avg += avg_frames[fi*TC_PIXELCOUNT+pi];
             }
-            frame[di] = avg / AVERAGE_FRAME_READS;
+            float t = avg / avg_cc;
+            
+            frame[pi] = t;
+            if (t > maxTemp)
+                maxTemp = t;
+            if (t < minTemp)
+                minTemp = t;
         }
     }
 
-    int getFrame()
+    int readFrame()
     {
-        int res = 0;
-        for (int i=0;i<AVERAGE_FRAME_READS;i++)
-        {
-            res = mlx.getFrame(frames[i]);
-            if (res != 0) return res;
-        }
-        average();
-        getMinMaxTemps();
+        int res = mlx.getFrame(&avg_frames[avg_cfi*TC_PIXELCOUNT]);
+        if (res != 0) return res;
+        
+        if (avg_cfi < (avg_cc-1)) avg_cfi++;
+        else avg_cfi = 0;
+
         return 0;
     }
 #else
-    void copyFromFrameTempAndGetMinMaxTemps()
+    float frameTemp[TC_PIXELCOUNT]; // this is the actual read buffer, when a completed frame has been read the contents of this is copied to frame
+
+    void updateFrameAndGetMinMaxTemps()
     {
         minTemp = 500.0f;
         maxTemp = -40.0f;
@@ -60,7 +69,7 @@ namespace ThermalCamera
         }
     }
 
-    int getFrame()
+    int readFrame()
     {
         //int res = mlx.getFrame(frameTemp);
         //if (res != 0) return res; // some error has occured
@@ -70,7 +79,6 @@ namespace ThermalCamera
     
 #endif
 
-    
 
     void printMLX_current_settings()
     {
@@ -104,6 +112,12 @@ namespace ThermalCamera
 
     void Init(mlx90640_mode_t mode, mlx90640_resolution_t resolution, mlx90640_refreshrate_t refreshrate)
     {
+#if AVERAGE_FRAME_READS > 1
+        avg_frames = (float*)malloc(AVERAGE_FRAME_READS*TC_PIXELCOUNT*4);
+        for (int i=0;i<(TC_PIXELCOUNT*AVERAGE_FRAME_READS);i++) {
+            avg_frames[i] = 0.0f;
+        }
+#endif
         Serial.println("log Adafruit MLX90640 Simple Test");
         Wire.setClock(1000000);
         if (! mlx.begin(MLX90640_I2CADDR_DEFAULT, &Wire)) {
