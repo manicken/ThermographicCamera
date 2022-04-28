@@ -22,7 +22,7 @@ namespace USBSerialStream
     
     void print_temperatures()
     {
-        
+        static uint32_t yieldWaitCounter = 0;
 
         Serial.printf("imgM %d\n", INTERPOLATED_ROWS*INTERPOLATED_COLS*3);
 
@@ -32,6 +32,13 @@ namespace USBSerialStream
                 float t = Main::dest_2d[index];
                 uint32_t colorIndex = constrain(map(t, ThermalCamera::minTemp, ThermalCamera::maxTemp, 0, COLOR_PALETTE_COUNT-1), 0, COLOR_PALETTE_COUNT-1);
                 Serial.write(&Main::camColors[colorIndex].arr[1], 3);
+
+                if (yieldWaitCounter != INTERPOLATED_COLS/8) yieldWaitCounter++;
+                else
+                {
+                    yieldWaitCounter = 0;
+                    yield();
+                }
             }
         }
 
@@ -63,6 +70,13 @@ namespace USBSerialStream
         //interpolate_image(Main::gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2);
         //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS/2, INTERPOLATED_COLS/2, Main::gblurTemp, 24, 32);
         //interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+
+       
+    }
+
+    void execNonInterpolated()
+    {
+        ThermalCamera::pixelate(ThermalCamera::frame, Main::dest_2d, 32,24,7);
     }
 
     uint32_t frame = 0;

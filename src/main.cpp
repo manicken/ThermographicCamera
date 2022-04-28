@@ -89,6 +89,11 @@ void setOutTarget(int target_id)
         Main::CallBack_outTarget_Interpolate = &USBSerialStream::execInterpolate;
         Display::disable();
     }
+    else if (Main::outTarget == Main::OUTPUT_TARGET::USB_VIDEO_STREAM_RAW) {
+        Main::CallBack_outTarget_Print = &USBSerialStream::print_BiqubicInterpolated;
+        Main::CallBack_outTarget_Interpolate = &USBSerialStream::execNonInterpolated;
+        Display::disable();
+    }
     else if (Main::outTarget == Main::OUTPUT_TARGET::USB_TEMP_VALUES_ASCII) {
         Main::CallBack_outTarget_Print = &USBSerialStream::printTempValues;
         Main::CallBack_outTarget_Interpolate = &Main::nonInterpolate;

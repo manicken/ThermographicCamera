@@ -270,10 +270,13 @@ namespace Display
         //interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         
         interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+        
         //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, gblurTemp, 24*2, 32*2);
         //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
 
         //Serial.print("Interpolation took "); Serial.print(millis()-t); Serial.println(" ms");
+
+        //ThermalCamera::pixelate(ThermalCamera::frame, Main::dest_2d, 32,24,9);
     }
 
     

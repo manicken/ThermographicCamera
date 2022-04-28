@@ -141,6 +141,23 @@ namespace ThermalCamera
 
         printMLX_current_settings();
     }
+
+    void pixelate(float *src, float *dst, int srcW, int srcH, int scale)
+    {
+        for (int y=0;y<srcH;y++)
+        {
+            for (int x=0;x<srcW;x++)
+            {
+                for (int sy=0;sy<scale;sy++)
+                {
+                    for (int sx=0;sx<scale;sx++)
+                    {
+                        dst[y*scale*scale*srcW + x*scale + sy*scale*srcW + sx] = src[y*srcW+x];
+                    }
+                }
+            }
+        }
+    }
 };
 
 #endif

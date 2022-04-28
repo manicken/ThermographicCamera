@@ -13,9 +13,10 @@ namespace Main
         TFT_RAW_PIXELS = 0,
         TFT_BIQUBIC_INTERPOLATE = 1,
         USB_VIDEO_STREAM = 2,
-        USB_ASCII_ART = 3,
-        USB_TEMP_VALUES_ASCII = 4,
-        UNKNOWN_LAST = 5
+        USB_VIDEO_STREAM_RAW = 3,
+        USB_ASCII_ART = 4,
+        USB_TEMP_VALUES_ASCII = 5,
+        UNKNOWN_LAST = 6
     } OUTPUT_TARGET;
 
     typedef enum {
