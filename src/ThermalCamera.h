@@ -144,6 +144,7 @@ namespace ThermalCamera
 
     void pixelate(float *src, float *dst, int srcW, int srcH, int scale)
     {
+        int dstW = srcW*scale;
         for (int y=0;y<srcH;y++)
         {
             for (int x=0;x<srcW;x++)
@@ -152,7 +153,8 @@ namespace ThermalCamera
                 {
                     for (int sx=0;sx<scale;sx++)
                     {
-                        dst[y*scale*scale*srcW + x*scale + sy*scale*srcW + sx] = src[y*srcW+x];
+                        //dst[y*scale*scale*srcW + x*scale + sy*scale*srcW + sx] = src[y*srcW+x];
+                        dst[(y*scale+sy)*dstW + x*scale + sx] = src[y*srcW+x];
                     }
                 }
             }

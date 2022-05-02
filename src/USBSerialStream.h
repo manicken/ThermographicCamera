@@ -6,8 +6,9 @@
 
 namespace USBSerialStream
 {
-    uint16_t INTERPOLATED_COLS = 224;
-    uint16_t INTERPOLATED_ROWS = 168;
+    uint32_t INTERPOLATED_COLS = 224;
+    uint32_t INTERPOLATED_ROWS = 168;
+    uint32_t PIXELATED_SIZE = (224/32);
 
     void print_Palette()
     {
@@ -76,7 +77,7 @@ namespace USBSerialStream
 
     void execNonInterpolated()
     {
-        ThermalCamera::pixelate(ThermalCamera::frame, Main::dest_2d, 32,24,7);
+        ThermalCamera::pixelate(ThermalCamera::frame, Main::dest_2d, 32,24,PIXELATED_SIZE);
     }
 
     uint32_t frame = 0;

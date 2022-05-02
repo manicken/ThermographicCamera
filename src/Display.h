@@ -55,11 +55,11 @@ namespace Display
     #define TFT_BL         9 
     #define TFT_SCREEN_WIDTH          320
     #define TFT_SCREEN_HEIGHT         240
-    #define INTERPOLATED_COLS_DEFAULT 288
-    #define INTERPOLATED_ROWS_DEFAULT 208
-    #define MAX_MID_MIN_TEXTS_Y_POS   210
+    #define INTERPOLATED_COLS_DEFAULT 288 /*288*/
+    #define INTERPOLATED_ROWS_DEFAULT 216 /*216*/
+    #define MAX_MID_MIN_TEXTS_Y_POS   (TFT_SCREEN_HEIGHT-16)
     #define MAX_MID_MIN_TEXTS_SIZE    1
-    #define COLOR_PALETTE_Y_POS       219
+    #define COLOR_PALETTE_Y_POS       (TFT_SCREEN_HEIGHT-8)
     #define NON_INTERPOLATED_PIXEL_SIZE 9
     #define TFT_CMD_DISPOFF 0x28
     #define TFT_CMD_DISPON 0x29
@@ -197,9 +197,10 @@ namespace Display
     void printFps(float fps)
     {
         tft.setTextSize(1);
-        tft.fillRect(1, 230, 9*6, 7, COLOR_BLACK);
-        tft.setCursor(1, 230);
+        tft.fillRect(320-4*6, 0, 4*6, 8*2, COLOR_BLACK);
+        tft.setCursor(320-4*6, 0);
         tft.print("fps:");
+        tft.setCursor(320-4*6, 8);
         tft.print(fps);
     }
 
@@ -220,11 +221,11 @@ namespace Display
     void printCurrentGradientColorPalette()
     {
         // print the colormap name
-        tft.fillRect(120, 230, 100, 7, COLOR_BLACK);
-        tft.setTextSize(1);
-        tft.setTextColor(COLOR_WHITE);
-        tft.setCursor(120, 230);
-        tft.print(GradientPalettes::Def[Main::currentColorMapIndex].name);
+        //tft.fillRect(120, 230, 100, 7, COLOR_BLACK);
+        //tft.setTextSize(1);
+        //tft.setTextColor(COLOR_WHITE);
+        //tft.setCursor(120, 230);
+        //tft.print(GradientPalettes::Def[Main::currentColorMapIndex].name);
 
         // draw the temp-range colormap 
         for (int i=0;i<7;i++)
@@ -269,14 +270,14 @@ namespace Display
         //interpolate_image(Main::dest_2d, 24*INTERPOLATE_SMOOTH_FACTOR, 32*INTERPOLATE_SMOOTH_FACTOR, Main::gblurTemp, 24, 32);
         //interpolate_image(Main::gblurTemp, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
         
-        interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
+/*normal*/interpolate_image(ThermalCamera::frame, 24, 32, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS); // normal
         
         //interpolate_image(Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, gblurTemp, 24*2, 32*2);
         //interpolate_image(gblurTemp, 24*2, 32*2, Main::dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS);
 
         //Serial.print("Interpolation took "); Serial.print(millis()-t); Serial.println(" ms");
 
-        //ThermalCamera::pixelate(ThermalCamera::frame, Main::dest_2d, 32,24,9);
+        //ThermalCamera::pixelate(ThermalCamera::frame, Main::dest_2d, 32,24,NON_INTERPOLATED_PIXEL_SIZE);
     }
 
     
