@@ -55,6 +55,8 @@ namespace Display
     #define TFT_BL         9 
     #define TFT_SCREEN_WIDTH          320
     #define TFT_SCREEN_HEIGHT         240
+    #define TFT_MAIN_IMAGE_X_OFFSET   2
+    #define TFT_MAIN_IMAGE_Y_OFFSET   2
     #define INTERPOLATED_COLS_DEFAULT 288 /*288*/
     #define INTERPOLATED_ROWS_DEFAULT 216 /*216*/
     #define MAX_MID_MIN_TEXTS_Y_POS   (TFT_SCREEN_HEIGHT-16)
@@ -170,7 +172,7 @@ namespace Display
     {
         static uint32_t yieldWaitCounter = 0;
         tft.startWrite();
-        tft.setAddrWindow(2, 2, INTERPOLATED_COLS, INTERPOLATED_ROWS);
+        tft.setAddrWindow(TFT_MAIN_IMAGE_X_OFFSET, TFT_MAIN_IMAGE_Y_OFFSET, INTERPOLATED_COLS, INTERPOLATED_ROWS);
         for (int16_t r=0; r<INTERPOLATED_ROWS; r++) {
             for (int16_t c=INTERPOLATED_COLS-1; c>=0; c--) { // draw cols in reverse order because data from MLX is reversed
                 int index = r*INTERPOLATED_COLS + c;
@@ -212,7 +214,9 @@ namespace Display
                 float t = ThermalCamera::frame[h*32 + w];
                 uint32_t colorIndex = map(t, ThermalCamera::minTemp, ThermalCamera::maxTemp, 0, COLOR_PALETTE_COUNT-1);
                 colorIndex = constrain(colorIndex, 0, COLOR_PALETTE_COUNT-1);
-                tft.fillRect((31-w)*NON_INTERPOLATED_PIXEL_SIZE, h*NON_INTERPOLATED_PIXEL_SIZE, NON_INTERPOLATED_PIXEL_SIZE, NON_INTERPOLATED_PIXEL_SIZE, Main::camColors[colorIndex].toRGB565());
+                tft.fillRect((31-w)*NON_INTERPOLATED_PIXEL_SIZE + TFT_MAIN_IMAGE_X_OFFSET, h*NON_INTERPOLATED_PIXEL_SIZE + TFT_MAIN_IMAGE_Y_OFFSET,
+                             NON_INTERPOLATED_PIXEL_SIZE, NON_INTERPOLATED_PIXEL_SIZE,
+                             Main::camColors[colorIndex].toRGB565());
             }
         }
         printFps(fps);
